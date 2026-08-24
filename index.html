@@ -2,66 +2,151 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>แม่หมอ VR — ทำนายสายอาชีพในอนาคต</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#210E3A">
+<meta name="description" content="กิจกรรมทำนายสายอาชีพไอที ตอบคำถาม 6 ข้อด้วยการยกมือหน้ากล้องหรือแตะหน้าจอ">
+<title>ผู้พิทักษ์แห่งโชคชะตา — ทำนายสายอาชีพในอนาคต</title>
 <style>
+/* ===================================================================
+   ผู้พิทักษ์แห่งโชคชะตา — สไตล์ชีต (ออกแบบจากจอเล็กขึ้นไปหาจอใหญ่ mobile-first)
+   ลำดับ: ตัวแปร → พื้นฐาน → โครงหน้า → ส่วนประกอบ → แต่ละฉาก → จอใหญ่
+   =================================================================== */
+
+/* ---------- 1. ตัวแปร ---------- */
 :root{
+  /* สี */
   --bg1:#3C1C63; --bg2:#210E3A; --bg3:#140823;
   --text:#FFF7EA; --text-2:#DCCBEE;
-  --gold:#FFD684; --gold-line:rgba(255,214,132,.35);
+  --gold:#FFD684; --gold-line:rgba(255,214,132,.34);
   --card:rgba(255,255,255,.07);
   --card-hover:rgba(255,214,132,.16);
-  --panel:rgba(12,5,24,.96);
+  --panel:rgba(12,5,24,.97);
+  --sunken:rgba(0,0,0,.16);
   --focus:#5BE7CB;
+  /* ตัวอักษร — ภาษาไทยมีสระบนล่าง จึงเว้นบรรทัดกว้างกว่าปกติ */
   --base:18px;
+  --lh:1.72;
   --font-display:"Leelawadee UI","Noto Sans Thai","Sarabun",Tahoma,sans-serif;
   --font-body:"Sarabun","Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  /* ระยะและรูปทรง */
+  --pad:16px;            /* ระยะขอบซ้ายขวาของหน้า */
+  --r-lg:22px; --r-md:16px;
+  --tap:48px;            /* ขนาดเล็กสุดของปุ่มที่นิ้วแตะได้สบาย */
+  --maxw:660px;          /* ความกว้างสูงสุดของเนื้อหาที่อ่านเป็นย่อหน้า */
+  --top-h:60px;          /* ที่ว่างสำหรับแถบเครื่องมือด้านบน */
+  --bot-h:52px;          /* ที่ว่างสำหรับแถบด้านล่าง */
 }
 body[data-theme="light"]{
   --bg1:#FFF6E4; --bg2:#FDEBD2; --bg3:#F7E2CB;
-  --text:#2A1740; --text-2:#5B4472;
-  --gold:#8A5A00; --gold-line:rgba(138,90,0,.3);
+  --text:#2A1740; --text-2:#584070;
+  --gold:#8A5A00; --gold-line:rgba(138,90,0,.32);
   --card:#FFFFFF; --card-hover:#FFF0D2; --panel:rgba(255,250,240,.98);
+  --sunken:rgba(0,0,0,.04);
   --focus:#0F7A66;
 }
-body[data-size="lg"]{--base:22px}
+
+/* ---------- 2. พื้นฐาน ---------- */
 *{box-sizing:border-box}
-html,body{height:100%}
+html{-webkit-text-size-adjust:100%}
 body{
-  margin:0;background:radial-gradient(125% 95% at 50% 0%,var(--bg1) 0%,var(--bg2) 48%,var(--bg3) 100%);
-  color:var(--text);font-family:var(--font-body);font-size:var(--base);line-height:1.6;
-  -webkit-text-size-adjust:100%;
+  margin:0;min-height:100vh;overflow-x:hidden;
+  background:radial-gradient(125% 95% at 50% 0%,var(--bg1) 0%,var(--bg2) 48%,var(--bg3) 100%);
+  background-attachment:fixed;
+  color:var(--text);font-family:var(--font-body);font-size:var(--base);line-height:var(--lh);
 }
-#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
-body[data-theme="light"] #stars{display:none}
-.wrap{position:relative;z-index:1;min-height:100%;display:flex;align-items:center;justify-content:center;
-  padding:76px 20px 88px}
-.stage{width:min(920px,100%);text-align:center;animation:rise .45s ease both}
-@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+h1,h2,h3,p,ul{margin:0}
+button,input{font-family:inherit}
 .hidden{display:none !important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.only-lg{display:none}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+body[data-theme="light"] #stars{display:none}
 
-/* แถบเครื่องมือช่วยการเข้าถึง */
-.tools{position:fixed;top:0;left:0;right:0;z-index:6;display:flex;gap:8px;justify-content:center;
-  flex-wrap:wrap;padding:12px;background:linear-gradient(180deg,rgba(0,0,0,.28),transparent)}
-body[data-theme="light"] .tools{background:linear-gradient(180deg,rgba(0,0,0,.06),transparent)}
-.tool{font-family:var(--font-body);font-size:15px;padding:9px 16px;min-height:44px;border-radius:999px;
-  border:1.5px solid var(--gold-line);background:var(--card);color:var(--text);cursor:pointer}
-.tool:hover{background:var(--card-hover)}
+/* ---------- 3. โครงหน้า ---------- */
+.wrap{
+  position:relative;z-index:1;
+  min-height:100vh;min-height:100dvh;
+  display:flex;align-items:center;justify-content:center;
+  padding:calc(var(--top-h) + env(safe-area-inset-top) + 8px)
+          max(var(--pad),env(safe-area-inset-right))
+          calc(var(--bot-h) + env(safe-area-inset-bottom) + 8px)
+          max(var(--pad),env(safe-area-inset-left));
+}
+.stage{width:min(920px,100%);text-align:center;animation:rise .4s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
-.rule{display:flex;align-items:center;justify-content:center;gap:10px;margin:16px 0}
-.rule i{width:74px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-line))}
+/* แถบเครื่องมือด้านบน — บังคับให้อยู่บรรทัดเดียวเสมอ ความสูงจะได้คงที่ */
+.tools{
+  position:fixed;top:0;left:0;right:0;z-index:6;
+  display:flex;gap:8px;flex-wrap:nowrap;
+  justify-content:flex-start;justify-content:safe center;   /* safe = ถ้าล้นจอจะไม่ตัดปุ่มซ้ายทิ้ง */
+  overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;
+  padding:10px max(10px,env(safe-area-inset-right)) 10px max(10px,env(safe-area-inset-left));
+  padding-top:calc(10px + env(safe-area-inset-top));
+  background:linear-gradient(180deg,rgba(0,0,0,.42),rgba(0,0,0,.12) 70%,transparent);
+}
+.tools::-webkit-scrollbar{display:none}
+body[data-theme="light"] .tools{background:linear-gradient(180deg,rgba(255,246,228,.92),rgba(255,246,228,.5) 70%,transparent)}
+
+footer{
+  position:fixed;bottom:0;left:0;right:0;z-index:6;text-align:center;
+  font-size:14px;color:var(--text-2);
+  padding:6px max(10px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+  background:linear-gradient(0deg,rgba(0,0,0,.42),rgba(0,0,0,.12) 70%,transparent);
+}
+body[data-theme="light"] footer{background:linear-gradient(0deg,rgba(255,246,228,.92),rgba(255,246,228,.5) 70%,transparent)}
+footer button{background:none;border:0;color:var(--text-2);cursor:pointer;font:inherit;
+  text-decoration:underline;min-height:40px;padding:0 6px}
+
+/* ---------- 4. ส่วนประกอบร่วม ---------- */
+.eyebrow{font-family:var(--font-display);font-size:.82em;letter-spacing:.1em;
+  color:var(--gold);margin-bottom:6px}
+h1{font-family:var(--font-display);font-weight:700;font-size:clamp(32px,8.4vw,52px);
+  line-height:1.2}
+h1 span{color:var(--gold)}
+.lead{font-size:1em;color:var(--text-2);max-width:min(100%,40ch);margin:14px auto 0}
+.small{font-size:.84em;color:var(--text-2);max-width:min(100%,44ch);margin-left:auto;margin-right:auto}
+
+.rule{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0}
+.rule i{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-line))}
 .rule i+i{background:linear-gradient(90deg,var(--gold-line),transparent)}
 .rule b{width:9px;height:9px;background:var(--gold);transform:rotate(45deg)}
 
-.eyebrow{font-family:var(--font-display);letter-spacing:.34em;font-size:.72em;color:var(--gold);margin:0 0 4px}
-h1{font-family:var(--font-display);font-weight:700;font-size:clamp(30px,6.2vw,52px);line-height:1.15;margin:0}
-h1 span{color:var(--gold)}
-.lead{font-size:1.02em;color:var(--text-2);max-width:42ch;margin:14px auto 0}
-.small{font-size:.82em;color:var(--text-2)}
+/* ปุ่มหลัก */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:1.02em;font-weight:700;
+  padding:14px 28px;min-height:56px;border-radius:999px;border:2px solid transparent;
+  background:linear-gradient(180deg,#FFE9BC,#FFD07A);color:#3A1D00;cursor:pointer;
+  box-shadow:0 8px 22px rgba(0,0,0,.28);
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:transform .12s,box-shadow .12s;
+}
+.btn.ghost{background:var(--card);color:var(--text);border-color:var(--gold-line);box-shadow:none}
+.btn.small{font-size:.92em;padding:11px 22px;min-height:var(--tap)}
+.btn:active{transform:scale(.98)}
+@media(hover:hover){.btn:hover{transform:translateY(-2px)}}
 
-/* แม่หมอ + ลูกแก้ว */
-.seer{position:relative;width:min(340px,86vw);margin:6px auto 0}
+/* ปุ่มรอง (แถบเครื่องมือ และปุ่มเล็กในกล่อง) */
+.tool{
+  flex:0 0 auto;font-family:var(--font-body);font-size:14px;line-height:1;
+  padding:0 14px;min-height:44px;border-radius:999px;
+  border:1.5px solid var(--gold-line);background:var(--card);color:var(--text);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;white-space:nowrap;
+}
+@media(hover:hover){.tool:hover{background:var(--card-hover)}}
+.tool:active{background:var(--card-hover)}
+
+/* แถวปุ่ม — จอเล็กเรียงลงล่างเต็มความกว้าง แตะง่ายกว่าเรียงข้างกัน */
+.row{display:flex;flex-direction:column;align-items:stretch;gap:10px;
+  max-width:420px;margin:22px auto 0}
+.row .btn{width:100%}
+.row .btn.small{width:auto;align-self:center}
+
+/* ---------- 5. หน้าเริ่ม ---------- */
+.seer{position:relative;width:min(300px,74vw);margin:4px auto 0}
 .seer svg.fig{display:block;width:100%;height:auto}
 .orb-holder{position:relative;width:52%;margin:-19% auto 0;aspect-ratio:1;z-index:2}
 .orb{position:absolute;inset:0;border-radius:50%;overflow:hidden;
@@ -74,98 +159,170 @@ h1 span{color:var(--gold)}
 .orb-glass{position:absolute;inset:0;border-radius:50%;pointer-events:none;
   background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.55),transparent 44%)}
 
-/* ปุ่ม */
-.btn{font-family:var(--font-display);font-size:1.05em;font-weight:700;letter-spacing:.02em;
-  padding:16px 36px;min-height:60px;border-radius:999px;border:2px solid transparent;cursor:pointer;
-  background:linear-gradient(180deg,#FFE9BC,#FFD07A);color:#3A1D00;
-  box-shadow:0 8px 24px rgba(0,0,0,.28);transition:transform .12s}
-.btn:hover{transform:translateY(-2px)}
-.btn.ghost{background:var(--card);color:var(--text);border-color:var(--gold-line);box-shadow:none}
-.btn.small{font-size:.9em;padding:12px 22px;min-height:50px}
-:focus-visible{outline:4px solid var(--focus);outline-offset:3px}
-.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+/* ข้อเท็จจริงสั้น ๆ กวาดตาอ่านได้เร็วกว่าประโยคยาว */
+.facts{list-style:none;padding:0;margin:16px auto 0;
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.facts li{font-size:.8em;color:var(--text-2);padding:6px 14px;
+  border-radius:999px;border:1px solid var(--gold-line);background:var(--card)}
 
-/* คำถาม */
-.progress{max-width:620px;margin:0 auto 18px}
-.progress p{font-family:var(--font-display);font-size:.85em;color:var(--gold);margin:0 0 8px;letter-spacing:.08em}
-.progress .track{display:flex;gap:8px;justify-content:center}
-.progress b{flex:1;max-width:74px;height:8px;border-radius:99px;background:var(--card);border:1px solid var(--gold-line)}
+/* ---------- 6. หน้าคำถาม ---------- */
+/* จอเล็กให้ตัวเลือกอยู่ก่อนกล้อง จะได้ไม่ต้องเลื่อนผ่านกล้องทุกข้อ */
+#s-quiz{display:flex;flex-direction:column}
+#s-quiz .progress{order:1}
+#s-quiz .q{order:2}
+#s-quiz .choices{order:3}
+#s-quiz .campanel{order:4}
+#s-quiz .row{order:5}
+
+.progress{width:100%;max-width:420px;margin:0 auto 16px}
+.progress p{font-family:var(--font-display);font-size:.86em;color:var(--gold);margin-bottom:8px}
+.progress .track{display:flex;gap:6px;justify-content:center}
+.progress b{flex:1;max-width:64px;height:7px;border-radius:99px;
+  background:var(--card);border:1px solid var(--gold-line)}
 .progress b.on{background:var(--gold);border-color:var(--gold)}
-.q{font-family:var(--font-display);font-size:clamp(22px,3.6vw,32px);line-height:1.4;margin:0 auto;max-width:26ch}
-.choices{display:grid;gap:14px;max-width:660px;margin:24px auto 0;text-align:left}
-@media(min-width:760px){.choices{grid-template-columns:1fr 1fr}}
-.choice{display:flex;gap:16px;align-items:center;padding:16px;min-height:96px;border-radius:20px;cursor:pointer;
+
+.q{font-family:var(--font-display);font-size:clamp(22px,5.6vw,32px);line-height:1.45;
+  max-width:min(100%,28ch);margin:0 auto}
+
+.choices{display:grid;gap:12px;width:100%;max-width:var(--maxw);margin:20px auto 0;text-align:left}
+.choice{
+  display:flex;gap:13px;align-items:center;width:100%;
+  padding:13px;min-height:76px;border-radius:var(--r-md);cursor:pointer;
   background:var(--card);border:2px solid var(--gold-line);color:var(--text);
-  font-family:var(--font-body);font-size:1em;line-height:1.45;text-align:left;transition:.14s}
-.choice:hover{background:var(--card-hover);border-color:var(--gold);transform:translateY(-2px)}
+  font-family:var(--font-body);font-size:.98em;line-height:1.5;text-align:left;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:background .14s,border-color .14s,transform .12s;
+}
 .choice .num{flex:0 0 30px;height:30px;border-radius:50%;background:var(--gold);color:#3A1D00;
   display:grid;place-items:center;font-weight:700;font-size:15px;font-family:var(--font-display)}
-.choice svg{flex:0 0 60px;width:60px;height:60px}
-body[data-size="lg"] .choice{min-height:112px}
+.choice svg{flex:0 0 50px;width:50px;height:50px}
+.choice:active{transform:scale(.985);background:var(--card-hover)}
+@media(hover:hover){.choice:hover{background:var(--card-hover);border-color:var(--gold);transform:translateY(-2px)}}
+.choice.hot{border-color:var(--gold);background:var(--card-hover)}
 
-/* แถบกล้องสำหรับเลือกคำตอบด้วยมือ */
-.camwrap{position:relative;width:min(660px,100%);margin:18px auto 0;border-radius:20px;overflow:hidden;
-  border:2px solid var(--gold-line);background:#100722;aspect-ratio:16/7.4}
+/* กล่องกล้อง — เป็นทางเลือกเสริม จึงจัดเป็นกล่องแยกที่ดูเบากว่าตัวเลือก */
+.campanel{width:100%;max-width:var(--maxw);margin:22px auto 0;padding:14px;
+  border:1.5px solid var(--gold-line);border-radius:var(--r-lg);background:var(--sunken)}
+.campanel-head{font-family:var(--font-display);font-size:.92em;font-weight:700;
+  color:var(--gold);margin-bottom:10px}
+.campanel.off{padding:12px 14px}
+.campanel.off .camwrap,.campanel.off .camctl,.campanel.off .camnote{display:none}
+.campanel.off .campanel-head{margin-bottom:0;color:var(--text-2);font-weight:400}
+
+.camwrap{position:relative;width:100%;margin:0 auto;border-radius:var(--r-md);overflow:hidden;
+  border:1.5px solid var(--gold-line);background:#100722;aspect-ratio:16/7.4}
 #cam2{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);opacity:.8}
 .zones{position:absolute;inset:0;display:flex}
-.zone{flex:1;position:relative;display:grid;place-items:center;border-right:2px solid rgba(255,255,255,.28)}
+.zone{flex:1;position:relative;display:grid;place-items:center;
+  border-right:2px solid rgba(255,255,255,.28)}
 .zone:last-child{border-right:0}
-.zone .zfill{position:absolute;bottom:0;left:0;right:0;height:0;background:rgba(255,214,132,.6)}
-.zone .znum{position:relative;font-family:var(--font-display);font-size:30px;font-weight:700;color:#fff;
-  text-shadow:0 2px 8px #000,0 0 3px #000}
+.zone .zfill{position:absolute;bottom:0;left:0;right:0;height:0;
+  background:rgba(255,214,132,.6);transition:height .08s linear}
+.zone .znum{position:relative;font-family:var(--font-display);font-weight:700;color:#fff;
+  font-size:clamp(22px,6.4vw,32px);text-shadow:0 2px 8px #000,0 0 3px #000}
 .zone.hot{box-shadow:inset 0 0 0 4px var(--gold);background:rgba(255,214,132,.16)}
-.zone .zfill{transition:height .08s linear}
 .camoff{position:absolute;inset:0;display:grid;place-items:center;background:rgba(20,8,35,.85);
-  color:var(--text);font-size:.9em;padding:12px;text-align:center}
-.choice.hot{border-color:var(--gold);background:var(--card-hover)}
-.camnote{font-size:.8em;color:var(--text-2);margin:8px 0 0;min-height:1.4em}
-.camctl{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:10px}
+  color:#FFF7EA;font-size:.86em;padding:12px;text-align:center}
+
+.camnote{font-size:.82em;color:var(--text-2);margin-top:10px;text-align:center;min-height:1.4em}
+.camnote-fine{font-size:.76em;opacity:.85;min-height:0;line-height:1.6}
+.camctl{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:10px}
 .camctl label{font-size:.8em;color:var(--text-2)}
-.camctl input[type=range]{width:170px;accent-color:var(--gold)}
-.camctl .tool{font-size:14px;padding:8px 14px;min-height:40px}
+.camctl input[type=range]{width:150px;height:32px;accent-color:var(--gold);touch-action:manipulation}
 
-/* กำลังทำนาย */
-.bar{width:min(340px,82vw);height:10px;border-radius:99px;background:var(--card);border:1px solid var(--gold-line);
-  margin:24px auto 0;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .12s linear}
-.spin{width:150px;height:150px;margin:0 auto;animation:sway 2.4s ease-in-out infinite}
+/* ---------- 7. หน้ากำลังทำนาย ---------- */
+.spin{width:clamp(120px,36vw,150px);height:auto;margin:0 auto;display:block;
+  animation:sway 2.4s ease-in-out infinite}
 @keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.bar{width:min(340px,80vw);height:10px;border-radius:99px;background:var(--card);
+  border:1px solid var(--gold-line);margin:22px auto 0;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .12s linear}
 
-/* ผลทำนาย */
-.badge{font-family:var(--font-display);font-size:.72em;letter-spacing:.24em;color:#3A1D00;
+/* ---------- 8. หน้าผลทำนาย ---------- */
+.badge{font-family:var(--font-display);font-size:.78em;letter-spacing:.06em;color:#3A1D00;
   background:var(--gold);display:inline-block;padding:7px 16px;border-radius:999px}
-.title{font-family:var(--font-display);font-size:clamp(28px,5.2vw,44px);margin:12px 0 0;color:var(--gold)}
-.avatar{width:min(190px,54vw);height:auto;margin:6px auto 0;display:block}
-.card{background:var(--card);border:2px solid var(--gold-line);border-radius:22px;
-  padding:22px;max-width:660px;margin:20px auto 0;text-align:left}
-.card h3{font-family:var(--font-display);font-size:.8em;letter-spacing:.16em;color:var(--gold);margin:0 0 6px}
-.card p{margin:0 0 18px}
-.tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.title{font-family:var(--font-display);font-size:clamp(26px,6.6vw,42px);line-height:1.25;
+  margin-top:12px;color:var(--gold)}
+.avatar{width:min(170px,44vw);height:auto;margin:8px auto 0;display:block}
+
+.card{background:var(--card);border:2px solid var(--gold-line);border-radius:var(--r-lg);
+  padding:18px;width:100%;max-width:var(--maxw);margin:20px auto 0;text-align:left}
+.card h3{font-family:var(--font-display);font-size:.88em;font-weight:700;letter-spacing:.02em;
+  color:var(--gold);margin-bottom:6px}
+.card p{margin-bottom:20px;line-height:1.82}
+.card > :last-child{margin-bottom:0}
+
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
 .tag{font-size:.82em;padding:7px 14px;border-radius:999px;background:var(--card-hover);
   border:1.5px solid var(--gold-line)}
-.power div{display:flex;align-items:center;gap:12px;font-size:.85em;margin-bottom:8px}
-.power span{flex:0 0 40%;color:var(--text-2)}
-.power i{flex:1;height:12px;border-radius:99px;background:var(--card-hover);position:relative;overflow:hidden;
+
+/* แถบพลัง — จอเล็กวางชื่อไว้เหนือแถบ อ่านง่ายกว่าบีบชื่อให้แคบ */
+.power div{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:14px}
+.power div:last-child{margin-bottom:0}
+.power span{font-size:.86em;color:var(--text-2)}
+.power i{height:12px;border-radius:99px;background:var(--sunken);position:relative;overflow:hidden;
   border:1px solid var(--gold-line)}
 .power i::after{content:"";position:absolute;inset:0;width:var(--w);background:var(--gold)}
-.all-item{display:flex;gap:14px;align-items:center;margin-bottom:16px}
-.all-item svg{flex:0 0 62px;width:62px;height:62px}
-.all-item b{font-family:var(--font-display);color:var(--gold);display:block}
 
-footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:10px;font-size:14px;
-  color:var(--text-2);z-index:6;background:linear-gradient(0deg,rgba(0,0,0,.3),transparent)}
-body[data-theme="light"] footer{background:linear-gradient(0deg,rgba(0,0,0,.06),transparent)}
-footer button{background:none;border:0;color:var(--text-2);cursor:pointer;font:inherit;
-  text-decoration:underline;min-height:44px}
+.all-item{display:flex;gap:13px;align-items:center;margin-bottom:16px}
+.all-item:last-child{margin-bottom:0}
+.all-item svg{flex:0 0 54px;width:54px;height:54px}
+.all-item b{font-family:var(--font-display);color:var(--gold);display:block;line-height:1.4}
+.all-item .small{display:block;margin:0;max-width:none}
 
-.panel{position:fixed;inset:0;background:var(--panel);z-index:9;padding:26px;overflow:auto}
+/* ---------- 9. แผงบันทึกผู้เข้าร่วม ---------- */
+.panel{position:fixed;inset:0;z-index:9;background:var(--panel);overflow:auto;
+  overscroll-behavior:contain;
+  padding:calc(20px + env(safe-area-inset-top)) max(var(--pad),env(safe-area-inset-right))
+          calc(24px + env(safe-area-inset-bottom)) max(var(--pad),env(safe-area-inset-left))}
 .panel .inner{max-width:780px;margin:0 auto;text-align:left}
-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:.85em}
-th,td{padding:10px;border-bottom:1px solid var(--gold-line);text-align:left}
-th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
-.stat{display:flex;gap:28px;flex-wrap:wrap;margin-top:14px}
-.stat div b{display:block;font-family:var(--font-display);font-size:34px;color:var(--gold);line-height:1.2}
+.panel .row{max-width:none;margin-top:18px}
+.stat{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.stat div b{display:block;font-family:var(--font-display);font-size:30px;color:var(--gold);line-height:1.2}
 .stat div span{font-size:.8em;color:var(--text-2)}
+.tablewrap{margin-top:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  border:1px solid var(--gold-line);border-radius:var(--r-md)}
+table{width:100%;min-width:520px;border-collapse:collapse;font-size:.84em}
+th,td{padding:10px 12px;border-bottom:1px solid var(--gold-line);text-align:left;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+th{color:var(--gold);font-size:.92em}
+
+/* ---------- 10. จอกลาง (แท็บเล็ต) ---------- */
+@media(min-width:600px){
+  :root{--pad:20px;--top-h:64px}
+  .only-lg{display:inline}
+  .tools{overflow:visible}
+  .tool{font-size:15px;padding:0 16px}
+  .row{flex-direction:row;justify-content:center;flex-wrap:wrap;max-width:none;gap:12px}
+  .row .btn{width:auto}
+  .lead{font-size:1.04em}
+  .choice{padding:16px;gap:16px;min-height:92px;font-size:1em}
+  .choice svg{flex-basis:58px;width:58px;height:58px}
+  .card{padding:24px}
+  .campanel{padding:18px}
+  .stat{display:flex;gap:28px;flex-wrap:wrap}
+  .panel .row{justify-content:flex-start}
+}
+
+/* ---------- 11. จอใหญ่ (คอมพิวเตอร์ / บูธ) ---------- */
+@media(min-width:900px){
+  :root{--base:19px}
+  .seer{width:min(340px,60vw)}
+  .choices{max-width:860px;grid-template-columns:1fr 1fr}
+  .campanel{max-width:860px}
+  /* จอใหญ่มีที่พอ ให้กล้องอยู่เหนือตัวเลือกเหมือนเดิม ผู้เล่นที่ยืนห่างจะเห็นครบในตาเดียว */
+  #s-quiz .campanel{order:3}
+  #s-quiz .choices{order:4}
+  .power div{grid-template-columns:minmax(0,38%) 1fr;align-items:center;gap:14px;margin-bottom:10px}
+}
+
+/* ---------- 12. โหมดตัวอักษรใหญ่ (ต้องอยู่ท้ายสุดเพื่อทับค่าด้านบน) ---------- */
+body[data-size="lg"]{--base:21px}
+body[data-size="lg"] .choice{min-height:96px}
+body[data-size="lg"] .camctl,body[data-size="lg"] .camnote-fine{font-size:1em}
+@media(min-width:900px){body[data-size="lg"]{--base:24px}}
+
+/* ---------- 13. ลดการเคลื่อนไหว ---------- */
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
 </style>
 </head>
@@ -238,9 +395,9 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
 <canvas id="stars" aria-hidden="true"></canvas>
 
 <!-- แถบเครื่องมือ -->
-<div class="tools">
-  <button class="tool" id="tSize">ตัวอักษรใหญ่ขึ้น</button>
-  <button class="tool" id="tTheme">โหมดพื้นสว่าง</button>
+<div class="tools" role="group" aria-label="ตั้งค่าการแสดงผล">
+  <button class="tool" id="tSize">อักษรใหญ่</button>
+  <button class="tool" id="tTheme">พื้นสว่าง</button>
   <button class="tool" id="tCam">ปิดกล้อง</button>
   <button class="tool" id="tRestart">เริ่มใหม่</button>
 </div>
@@ -250,7 +407,7 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
   <!-- หน้าเริ่ม -->
   <section class="stage" id="s-intro">
     <p class="eyebrow">หลักสูตรเทคโนโลยีสารสนเทศ · มทร.ล้านนา ลำปาง</p>
-    <h1>แม่หมอ <span>VR</span></h1>
+    <h1>ผู้พิทักษ์แห่ง<span>โชคชะตา</span></h1>
     <div class="seer">
       <svg class="fig" viewBox="0 0 300 210" role="img" aria-label="ภาพการ์ตูนแม่หมอนั่งอยู่หลังลูกแก้ว"><use href="#fig-seer"/></svg>
       <div class="orb-holder">
@@ -260,10 +417,15 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
         </div>
       </div>
     </div>
-    <p class="lead">ตอบคำถามง่าย ๆ 6 ข้อ ด้วยการ<b>ยกมือหน้ากล้อง</b> แล้วแม่หมอจะทำนายว่าคุณเหมาะกับงานสายไอทีแบบไหน<br>ไม่มีคำตอบผิด ไม่ต้องเคยเรียนคอมพิวเตอร์มาก่อน</p>
+    <p class="lead">ตอบคำถามง่าย ๆ 6 ข้อ ด้วยการ<b>ยกมือหน้ากล้อง</b>หรือแตะหน้าจอ<br>แล้วแม่หมอจะทำนายว่าคุณเหมาะกับงานสายไอทีแบบไหน</p>
+    <ul class="facts">
+      <li>ใช้เวลา 3 นาที</li>
+      <li>ไม่มีคำตอบผิด</li>
+      <li>เล่นออฟไลน์ได้</li>
+      <li>ไม่เก็บข้อมูลส่วนตัว</li>
+    </ul>
     <div class="row"><button class="btn" id="go">เริ่มเปิดคำทำนาย</button></div>
-    <p class="small" style="margin-top:14px">ใช้เวลาประมาณ 3 นาที · เล่นแบบออฟไลน์ ไม่ต้องต่ออินเทอร์เน็ต · ไม่ถามชื่อและไม่เก็บข้อมูลส่วนตัว<br>
-      <span id="camMsg">กำลังเปิดกล้อง…</span></p>
+    <p class="small" style="margin-top:14px" id="camMsg">กำลังเปิดกล้อง…</p>
   </section>
 
   <!-- คำถาม -->
@@ -273,20 +435,24 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
       <div class="track" id="track" aria-hidden="true"></div>
     </div>
     <h2 class="q" id="qtext"></h2>
-    <p class="small" style="margin-top:10px">ยืนนิ่ง ๆ ให้กล้องจำพื้นหลังสักครู่ แล้ว<b>ยกมือขึ้นเหนือหมายเลขที่เลือก</b> ค้างไว้ราว 1.5 วินาที หรือกดปุ่มด้านล่างก็ได้</p>
-    <div class="camwrap">
-      <video id="cam2" autoplay muted playsinline aria-hidden="true"></video>
-      <div class="zones" id="zones" aria-hidden="true"></div>
-      <div class="camoff hidden" id="camoff">ตอนนี้ยังไม่ได้ใช้กล้อง — เลือกคำตอบด้วยการกดปุ่มด้านล่างได้เลย</div>
-    </div>
-    <p class="camnote" id="zhint">ยกมือขึ้นเหนือหมายเลขที่เลือก ค้างไว้ 1.5 วินาที</p>
-    <div class="camctl" id="camctl">
-      <label for="sens">ความไวกล้อง</label>
-      <input id="sens" type="range" min="1" max="5" step="1" value="4">
-      <button class="tool" id="recal" type="button">จำพื้นหลังใหม่</button>
-    </div>
-    <p class="camnote">กล้องใช้ตรวจจับการเคลื่อนไหวเท่านั้น ไม่บันทึกภาพ · กดตัวเลข 1–5 บนคีย์บอร์ดก็ได้</p>
     <div class="choices" id="choices" role="group" aria-labelledby="qtext"></div>
+
+    <div class="campanel">
+      <p class="campanel-head" id="camhead">หรือเลือกด้วยการยกมือหน้ากล้อง</p>
+      <div class="camwrap">
+        <video id="cam2" autoplay muted playsinline aria-hidden="true"></video>
+        <div class="zones" id="zones" aria-hidden="true"></div>
+        <div class="camoff hidden" id="camoff">ยังไม่ได้ใช้กล้อง — แตะเลือกคำตอบด้านบนได้เลย</div>
+      </div>
+      <p class="camnote" id="zhint">ยกมือขึ้นเหนือหมายเลขที่เลือก ค้างไว้ 1.5 วินาที</p>
+      <div class="camctl" id="camctl">
+        <label for="sens">ความไวกล้อง</label>
+        <input id="sens" type="range" min="1" max="5" step="1" value="4">
+        <button class="tool" id="recal" type="button">จำพื้นหลังใหม่</button>
+      </div>
+      <p class="camnote camnote-fine">ยืนนิ่ง ๆ ให้กล้องจำพื้นหลังสักครู่ก่อนยกมือ · กล้องใช้ตรวจจับการเคลื่อนไหวเท่านั้น ไม่บันทึกภาพ · กดปุ่มตัวเลข 1–5 บนคีย์บอร์ดก็ได้</p>
+    </div>
+
     <div class="row"><button class="btn ghost small" id="back">ย้อนกลับ</button></div>
   </section>
 
@@ -330,7 +496,7 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
   </section>
 </div>
 
-<footer>ทำงานแบบออฟไลน์ · ไม่เก็บชื่อและข้อมูลส่วนตัว · <button id="logBtn">บันทึกผู้เข้าร่วม (กด L)</button></footer>
+<footer><span class="only-lg">ทำงานแบบออฟไลน์ · ไม่เก็บชื่อและข้อมูลส่วนตัว · </span><button id="logBtn">บันทึกผู้เข้าร่วม<span class="only-lg"> (กด L)</span></button></footer>
 
 <!-- แผงบันทึกผู้เข้าร่วม -->
 <div class="panel hidden" id="panel" role="dialog" aria-label="บันทึกผู้เข้าร่วมกิจกรรม">
@@ -348,8 +514,10 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
       <button class="btn ghost small" id="clear">ล้างข้อมูล</button>
       <button class="btn ghost small" id="closePanel">ปิดหน้านี้</button>
     </div>
-    <table><thead><tr><th>วันที่</th><th>เวลา</th><th>รอบ (Session)</th><th>ผลการทำนาย</th><th>ใช้เวลา</th></tr></thead>
-    <tbody id="logRows"></tbody></table>
+    <div class="tablewrap">
+      <table><thead><tr><th>วันที่</th><th>เวลา</th><th>รอบ (Session)</th><th>ผลการทำนาย</th><th>ใช้เวลา</th></tr></thead>
+      <tbody id="logRows"></tbody></table>
+    </div>
     <p class="small" style="margin-top:16px">บันทึกเฉพาะวันที่ เวลา หมายเลขรอบที่ระบบสร้างอัตโนมัติ ผลการทำนาย และเวลาที่ใช้เล่น
       ไม่มีการเก็บชื่อ นามสกุล โรงเรียน หรือเบอร์โทร ภาพจากกล้องใช้แสดงในลูกแก้วและตรวจจับการโบกมือเท่านั้น ไม่ถูกบันทึกหรือส่งออกจากเครื่อง</p>
   </div>
@@ -469,6 +637,10 @@ function updateCamOverlay(){
   const live=camOn&&camReady;
   $("camoff").classList.toggle("hidden",live);
   $("cam2").style.visibility=live?"visible":"hidden";
+  // ไม่ได้ใช้กล้อง ก็ยุบกล่องกล้องทิ้ง เหลือแต่ตัวเลือกให้แตะ จะได้ไม่รกหน้าจอเล็ก
+  document.querySelector(".campanel").classList.toggle("off",!live);
+  $("camhead").textContent=live?"หรือเลือกด้วยการยกมือหน้ากล้อง"
+                               :"กล้องปิดอยู่ — แตะเลือกคำตอบด้านบนได้เลย";
 }
 function pick(i){
   if($("s-quiz").classList.contains("hidden"))return;
@@ -547,7 +719,7 @@ $("csv").onclick=()=>{
   const csv="\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  a.download="maemor-vr-log-"+today()+".csv";a.click();
+  a.download="guardian-of-fate-log-"+today()+".csv";a.click();
 };
 $("clear").onclick=()=>{if(confirm("ล้างบันทึกผู้เข้าร่วมทั้งหมดในเครื่องนี้?")){localStorage.removeItem(KEY);openPanel();}};
 
@@ -569,12 +741,13 @@ $("closeAll").onclick=()=>show("s-result");
 $("tSize").onclick=e=>{
   const big=document.body.dataset.size==="lg";
   document.body.dataset.size=big?"normal":"lg";
-  e.target.textContent=big?"ตัวอักษรใหญ่ขึ้น":"ตัวอักษรปกติ";
+  e.target.textContent=big?"อักษรใหญ่":"อักษรปกติ";
 };
 $("tTheme").onclick=e=>{
   const light=document.body.dataset.theme==="light";
   document.body.dataset.theme=light?"dark":"light";
-  e.target.textContent=light?"โหมดพื้นสว่าง":"โหมดพื้นเข้ม";
+  e.target.textContent=light?"พื้นสว่าง":"พื้นเข้ม";
+  document.querySelector('meta[name=theme-color]').content=light?"#210E3A":"#FFF6E4";
 };
 
 /* ---------- กล้องในลูกแก้ว + ตรวจจับการโบกมือ ---------- */
