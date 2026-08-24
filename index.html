@@ -212,7 +212,7 @@ h1 span{color:var(--gold)}
 .campanel.off .campanel-head{margin-bottom:0;color:var(--text-2);font-weight:400}
 
 .camwrap{position:relative;width:100%;margin:0 auto;border-radius:var(--r-md);overflow:hidden;
-  border:1.5px solid var(--gold-line);background:#100722;aspect-ratio:16/7.4}
+  border:1.5px solid var(--gold-line);background:#100722;aspect-ratio:16/9}
 #cam2{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);opacity:.8}
 .zones{position:absolute;inset:0;display:flex}
 .zone{flex:1;position:relative;display:grid;place-items:center;
@@ -764,7 +764,7 @@ const MOVE_CAP=10;                     // ค่าความขยับเ�
 const FLOOD=0.60;                      // ถ้าต่างจากพื้นหลังเกินนี้ แปลว่าแสงเปลี่ยนยกจอ ต้องจำใหม่
 const SETTLE_MS=500;                   // หลังภาพนิ่งแล้ว รออีกกี่มิลลิวินาทีจึงเริ่มตรวจใหม่
 const WARM_MS=600;                     // จำพื้นหลังนานเท่าไรจึงเริ่มเชื่อผลตรวจ
-const RELEARN_MS=400;                  // ภาพวุ่นวายนานเกินนี้ พอสงบแล้วให้จำพื้นหลังใหม่ทั้งหมด
+const RELEARN_MS=700;                  // ภาพวุ่นวายนานเกินนี้ พอสงบแล้วให้จำพื้นหลังใหม่ทั้งหมด
 let SENS=4;                            // ระดับความไว 1–5 ปรับได้จากแถบใต้กล้อง
 let camReady=false, camOn=true, stream=null, prev=null, bg=null, age=null;
 let hits=0, dwell=[], lockUntil=0, warmup=0, settle=0, busy=false, busyMs=0;
@@ -879,7 +879,7 @@ let lastT=0;
     // มือที่ "ยกขึ้น" จะอยู่สูงกว่าหัวและลำตัวเสมอ จึงชนะใบหน้าที่อยู่กลางภาพ
     const fg=new Array(n).fill(0), tot=new Array(n).fill(0);
     for(let y=0;y<H;y++){
-      const wy=1+1.1*(1-y/(H-1));
+      const wy=1+0.6*(1-y/(H-1));
       for(let x=0;x<W;x++){
         // ภาพที่ผู้เล่นเห็นถูกกลับซ้าย-ขวา จึงกลับคอลัมน์ให้ตรงกับที่เห็นบนจอ
         const z=Math.min(n-1,Math.floor((W-1-x)/(W/n)));
@@ -893,7 +893,9 @@ let lastT=0;
     busyMs=busy?busyMs+dt:busyMs;
     // ภาพเพิ่งวุ่นวายมานาน (มีคนเดินเข้ามายืน) พอสงบแล้วให้จำพื้นหลังใหม่
     // ตัวและใบหน้าของคนที่ยืนอยู่จะกลายเป็นพื้นหลัง เหลือแต่ "มือที่ยกขึ้นทีหลัง" เป็นของใหม่
-    if(!busy&&settle===0&&busyMs>RELEARN_MS){
+    // กันพลาด: ถ้ากำลังนับมือที่ยกค้างอยู่ ห้ามจำใหม่ ไม่งั้นมือจะกลายเป็นพื้นหลังเสียเอง
+    const holding=dwell.length?Math.max(...dwell)>200:false;
+    if(!busy&&settle===0&&busyMs>RELEARN_MS&&!holding){
       busyMs=0;resetVision();
       $("zhint").textContent="กำลังจำพื้นหลังใหม่ ยืนนิ่ง ๆ สักครู่…";
       requestAnimationFrame(loopMotion);return;
@@ -928,7 +930,7 @@ let lastT=0;
       }
     }else{
       // นอกหน้าคำถาม ใช้การโบกมือทั้งจอเป็นตัวสั่งงาน (สะสมเป็นมิลลิวินาที)
-      if(move>10||(ready&&ratio[0]>.12))hits+=dt;else hits=Math.max(0,hits-dt);
+      if(move>MOVE_CAP||(ready&&ratio[0]>.12))hits+=dt;else hits=Math.max(0,hits-dt);
       if(hits>250&&Date.now()>lockUntil){
         hits=0;lockUntil=Date.now()+LOCK_MS;
         if(waiting)finish();
@@ -937,7 +939,7 @@ let lastT=0;
     }
 
     // ปรับภาพพื้นหลัง: จุดว่างปรับเร็วตามแสง จุดที่เห็นเป็นวัตถุปรับช้า
-    // ส่วนของที่อยู่นิ่งเกิน 4 วินาที (เช่น ตัวคนที่ยืนรอ) ให้กลืนเป็นพื้นหลัง เหลือแต่มือที่เพิ่งยกขึ้น
+    // ส่วนของที่อยู่นิ่งเกิน 2.5 วินาที (เช่น ตัวคนที่ยืนรอ) ให้กลืนเป็นพื้นหลัง เหลือแต่มือที่เพิ่งยกขึ้น
     const k=dt/16.7;                          // ปรับความเร็วตามเวลาจริง ไม่ผูกกับจำนวนเฟรม
     const rFg=Math.min(1,A_FG*k), rBg=Math.min(1,A_BG*k);
     for(let i=0;i<cur.length;i++){
