@@ -68,13 +68,15 @@ body[data-theme="light"] #stars{display:none}
 .wrap{
   position:relative;z-index:1;
   min-height:100vh;min-height:100dvh;
-  display:flex;align-items:center;justify-content:center;
+  display:flex;align-items:flex-start;justify-content:center;
   padding:calc(var(--top-h) + env(safe-area-inset-top) + 8px)
           max(var(--pad),env(safe-area-inset-right))
           calc(var(--bot-h) + env(safe-area-inset-bottom) + 8px)
           max(var(--pad),env(safe-area-inset-left));
 }
-.stage{width:min(920px,100%);text-align:center;animation:rise .4s ease both}
+/* margin แนวตั้ง auto = จัดกึ่งกลางเมื่อเนื้อหาสั้น แต่ไม่ล้นไปทับแถบบน-ล่างเมื่อเนื้อหายาว
+   ต่างจาก align-items:center ที่ล้นออกนอก padding ทั้งสองด้านจนตัวหนังสือทับ footer */
+.stage{width:min(920px,100%);margin-block:auto;text-align:center;animation:rise .4s ease both}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
 /* แถบเครื่องมือด้านบน — บังคับให้อยู่บรรทัดเดียวเสมอ ความสูงจะได้คงที่ */
@@ -146,7 +148,7 @@ h1 span{color:var(--gold)}
 .row .btn.small{width:auto;align-self:center}
 
 /* ---------- 5. หน้าเริ่ม ---------- */
-.seer{position:relative;width:min(300px,74vw);margin:4px auto 0}
+.seer{position:relative;width:min(228px,56vw);margin:2px auto 0}
 .seer svg.fig{display:block;width:100%;height:auto}
 .orb-holder{position:relative;width:52%;margin:-19% auto 0;aspect-ratio:1;z-index:2}
 .orb{position:absolute;inset:0;border-radius:50%;overflow:hidden;
@@ -314,6 +316,7 @@ th{color:var(--gold);font-size:.92em}
   .row{flex-direction:row;justify-content:center;flex-wrap:wrap;max-width:none;gap:12px}
   .row .btn{width:auto}
   .lead{font-size:1.04em}
+  .seer{width:min(280px,48vw)}
   .choices{gap:10px}
   .choice{padding:12px 14px;gap:13px;min-height:70px;font-size:.95em}
   .choice .num{flex-basis:26px;height:26px;font-size:14px}
@@ -434,11 +437,11 @@ body[data-size="lg"] .camctl,body[data-size="lg"] .camnote-fine{font-size:1em}
         </div>
       </div>
     </div>
-    <p class="lead">ตอบคำถามง่าย ๆ 6 ข้อ ด้วยการ<b>ยกมือหน้ากล้อง</b>หรือแตะหน้าจอ<br>แล้วแม่หมอจะทำนายว่าคุณเหมาะกับงานสายไอทีแบบไหน</p>
+    <p class="lead">ตอบคำถาม 6 ข้อ แล้วมาดูว่าคุณเหมาะกับงานสายไอทีแบบไหน</p>
     <ul class="facts">
-      <li>ใช้เวลา 3 นาที</li>
+      <li>3 นาที</li>
+      <li>ยกมือหรือแตะจอ</li>
       <li>ไม่มีคำตอบผิด</li>
-      <li>เล่นออฟไลน์ได้</li>
       <li>ไม่เก็บข้อมูลส่วนตัว</li>
     </ul>
     <div class="row"><button class="btn" id="go">เริ่มเปิดคำทำนาย</button></div>
@@ -814,11 +817,11 @@ async function openCam(){
     stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480}},audio:false});
     video.srcObject=stream;video2.srcObject=stream;
     camReady=true;camOn=true;video.style.visibility="visible";resetVision();
-    $("camMsg").textContent="กล้องพร้อมแล้ว โบกมือหน้ากล้องเพื่อเริ่มเล่นได้เลย";
+    $("camMsg").textContent="กล้องพร้อมแล้ว โบกมือเพื่อเริ่มได้เลย";
     $("tCam").textContent="ปิดกล้อง";
   }catch(e){
     camReady=false;$("tCam").textContent="เปิดกล้อง";
-    $("camMsg").textContent="ยังไม่ได้ใช้กล้อง — กดปุ่มเล่นได้ตามปกติ (ดูวิธีเปิดกล้องในไฟล์ อ่านก่อนเล่น.txt)";
+    $("camMsg").textContent="ยังไม่ได้ใช้กล้อง — กดปุ่มเล่นได้ตามปกติ";
   }
   updateCamOverlay();
 }
@@ -826,7 +829,7 @@ function closeCam(){
   if(stream)stream.getTracks().forEach(t=>t.stop());
   stream=null;camReady=false;camOn=false;resetVision();
   video.style.visibility="hidden";
-  $("camMsg").textContent="ปิดกล้องอยู่ — เล่นด้วยการกดปุ่มได้ตามปกติ";
+  $("camMsg").textContent="ปิดกล้องอยู่ — กดปุ่มเล่นได้ตามปกติ";
   $("tCam").textContent="เปิดกล้อง";
   updateCamOverlay();
 }
