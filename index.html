@@ -6,332 +6,448 @@
 <title>แม่หมอ VR — ทำนายสายอาชีพในอนาคต</title>
 <style>
 :root{
-  --ink:#12071F;
-  --plum:#1E0B33;
-  --plum-2:#2E1250;
-  --gold:#F0C86A;
-  --gold-dim:#9A7C3C;
-  --jade:#43D9C0;
-  --rose:#FF7EB6;
-  --paper:#F6EEDC;
+  --bg1:#3C1C63; --bg2:#210E3A; --bg3:#140823;
+  --text:#FFF7EA; --text-2:#DCCBEE;
+  --gold:#FFD684; --gold-line:rgba(255,214,132,.35);
+  --card:rgba(255,255,255,.07);
+  --card-hover:rgba(255,214,132,.16);
+  --panel:rgba(12,5,24,.96);
+  --focus:#5BE7CB;
+  --base:18px;
   --font-display:"Leelawadee UI","Noto Sans Thai","Sarabun",Tahoma,sans-serif;
   --font-body:"Sarabun","Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif;
 }
+body[data-theme="light"]{
+  --bg1:#FFF6E4; --bg2:#FDEBD2; --bg3:#F7E2CB;
+  --text:#2A1740; --text-2:#5B4472;
+  --gold:#8A5A00; --gold-line:rgba(138,90,0,.3);
+  --card:#FFFFFF; --card-hover:#FFF0D2; --panel:rgba(255,250,240,.98);
+  --focus:#0F7A66;
+}
+body[data-size="lg"]{--base:22px}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
-  margin:0;background:radial-gradient(120% 90% at 50% 0%,#3A1A5E 0%,var(--plum) 45%,var(--ink) 100%);
-  color:var(--paper);font-family:var(--font-body);overflow:hidden;
+  margin:0;background:radial-gradient(125% 95% at 50% 0%,var(--bg1) 0%,var(--bg2) 48%,var(--bg3) 100%);
+  color:var(--text);font-family:var(--font-body);font-size:var(--base);line-height:1.6;
+  -webkit-text-size-adjust:100%;
 }
-#stars{position:fixed;inset:0;z-index:0}
-.wrap{position:relative;z-index:1;height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
-.stage{width:min(880px,100%);max-height:100%;overflow:auto;text-align:center;animation:rise .5s ease both}
-@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+body[data-theme="light"] #stars{display:none}
+.wrap{position:relative;z-index:1;min-height:100%;display:flex;align-items:center;justify-content:center;
+  padding:76px 20px 88px}
+.stage{width:min(920px,100%);text-align:center;animation:rise .45s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .hidden{display:none !important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
-/* ลายไทยคั่นบรรทัด */
-.rule{display:flex;align-items:center;justify-content:center;gap:10px;margin:18px 0}
-.rule i{display:block;width:78px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim))}
-.rule i+i{background:linear-gradient(90deg,var(--gold-dim),transparent)}
-.rule b{width:9px;height:9px;background:var(--gold);transform:rotate(45deg);box-shadow:0 0 12px rgba(240,200,106,.7)}
+/* แถบเครื่องมือช่วยการเข้าถึง */
+.tools{position:fixed;top:0;left:0;right:0;z-index:6;display:flex;gap:8px;justify-content:center;
+  flex-wrap:wrap;padding:12px;background:linear-gradient(180deg,rgba(0,0,0,.28),transparent)}
+body[data-theme="light"] .tools{background:linear-gradient(180deg,rgba(0,0,0,.06),transparent)}
+.tool{font-family:var(--font-body);font-size:15px;padding:9px 16px;min-height:44px;border-radius:999px;
+  border:1.5px solid var(--gold-line);background:var(--card);color:var(--text);cursor:pointer}
+.tool:hover{background:var(--card-hover)}
 
-.eyebrow{font-family:var(--font-display);letter-spacing:.42em;font-size:12px;color:var(--gold);text-transform:uppercase;margin:0 0 6px}
-h1{font-family:var(--font-display);font-weight:700;font-size:clamp(30px,6vw,54px);line-height:1.15;margin:0;letter-spacing:.02em}
+.rule{display:flex;align-items:center;justify-content:center;gap:10px;margin:16px 0}
+.rule i{width:74px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-line))}
+.rule i+i{background:linear-gradient(90deg,var(--gold-line),transparent)}
+.rule b{width:9px;height:9px;background:var(--gold);transform:rotate(45deg)}
+
+.eyebrow{font-family:var(--font-display);letter-spacing:.34em;font-size:.72em;color:var(--gold);margin:0 0 4px}
+h1{font-family:var(--font-display);font-weight:700;font-size:clamp(30px,6.2vw,52px);line-height:1.15;margin:0}
 h1 span{color:var(--gold)}
-.lead{font-size:clamp(15px,2.2vw,18px);color:#D8C8E8;max-width:44ch;margin:14px auto 0;line-height:1.7}
+.lead{font-size:1.02em;color:var(--text-2);max-width:42ch;margin:14px auto 0}
+.small{font-size:.82em;color:var(--text-2)}
 
-/* ลูกแก้ว = signature */
-.orb-holder{position:relative;width:min(300px,72vw);aspect-ratio:1;margin:8px auto 0}
+/* แม่หมอ + ลูกแก้ว */
+.seer{position:relative;width:min(340px,86vw);margin:6px auto 0}
+.seer svg.fig{display:block;width:100%;height:auto}
+.orb-holder{position:relative;width:52%;margin:-19% auto 0;aspect-ratio:1;z-index:2}
 .orb{position:absolute;inset:0;border-radius:50%;overflow:hidden;
-  background:radial-gradient(circle at 34% 28%,#6E3EA8,#2B1049 60%,#160828);
-  box-shadow:0 0 0 2px rgba(240,200,106,.55),0 0 60px rgba(122,60,190,.55),inset 0 0 60px rgba(0,0,0,.6);
+  background:radial-gradient(circle at 34% 28%,#7B4CBE,#33135A 62%,#1B0A31);
+  box-shadow:0 0 0 3px var(--gold),0 0 46px rgba(140,80,210,.6),inset 0 0 40px rgba(0,0,0,.55);
   animation:float 6s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 #cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);
-  filter:saturate(.5) contrast(1.1) hue-rotate(255deg) brightness(.9);opacity:.55;mix-blend-mode:screen}
+  filter:saturate(.6) brightness(.95);opacity:.6;mix-blend-mode:screen}
 .orb-glass{position:absolute;inset:0;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.5),rgba(255,255,255,0) 42%),
-             radial-gradient(circle at 70% 80%,rgba(255,126,182,.28),transparent 55%)}
-.orb-base{position:absolute;left:50%;bottom:-16px;transform:translateX(-50%);width:56%;height:26px;
-  border-radius:6px 6px 14px 14px;background:linear-gradient(180deg,var(--gold),#7A5A22);opacity:.9}
-.orb-cta{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);font-size:13px;color:var(--gold);
-  letter-spacing:.08em;text-shadow:0 2px 8px #000}
+  background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.55),transparent 44%)}
 
 /* ปุ่ม */
-.btn{font-family:var(--font-display);font-size:17px;font-weight:700;letter-spacing:.06em;
-  padding:15px 34px;border-radius:999px;border:1px solid var(--gold);cursor:pointer;
-  background:linear-gradient(180deg,#FBE0A2,var(--gold));color:#2A1206;
-  box-shadow:0 8px 26px rgba(240,200,106,.28);transition:transform .12s,box-shadow .12s}
-.btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(240,200,106,.4)}
-.btn.ghost{background:transparent;color:var(--gold);box-shadow:none}
-.btn.small{font-size:14px;padding:10px 20px}
-.btn:focus-visible,.choice:focus-visible{outline:3px solid var(--jade);outline-offset:3px}
-.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.btn{font-family:var(--font-display);font-size:1.05em;font-weight:700;letter-spacing:.02em;
+  padding:16px 36px;min-height:60px;border-radius:999px;border:2px solid transparent;cursor:pointer;
+  background:linear-gradient(180deg,#FFE9BC,#FFD07A);color:#3A1D00;
+  box-shadow:0 8px 24px rgba(0,0,0,.28);transition:transform .12s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:var(--card);color:var(--text);border-color:var(--gold-line);box-shadow:none}
+.btn.small{font-size:.9em;padding:12px 22px;min-height:50px}
+:focus-visible{outline:4px solid var(--focus);outline-offset:3px}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}
 
 /* คำถาม */
-.track{display:flex;gap:7px;justify-content:center;margin-bottom:22px}
-.track b{width:26px;height:3px;border-radius:2px;background:rgba(240,200,106,.22)}
-.track b.on{background:var(--gold)}
-.q{font-family:var(--font-display);font-size:clamp(21px,3.4vw,30px);line-height:1.45;margin:0 auto 6px;max-width:30ch}
-.qn{font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:10px}
-.choices{display:grid;gap:12px;max-width:620px;margin:22px auto 0;text-align:left}
-.choice{display:flex;gap:14px;align-items:center;padding:16px 18px;border-radius:16px;cursor:pointer;
-  background:rgba(255,255,255,.05);border:1px solid rgba(240,200,106,.22);color:var(--paper);
-  font-family:var(--font-body);font-size:16.5px;line-height:1.5;text-align:left;transition:.15s}
-.choice:hover{background:rgba(240,200,106,.12);border-color:var(--gold);transform:translateX(4px)}
-.choice em{font-style:normal;font-size:21px;filter:saturate(.9)}
+.progress{max-width:620px;margin:0 auto 18px}
+.progress p{font-family:var(--font-display);font-size:.85em;color:var(--gold);margin:0 0 8px;letter-spacing:.08em}
+.progress .track{display:flex;gap:8px;justify-content:center}
+.progress b{flex:1;max-width:74px;height:8px;border-radius:99px;background:var(--card);border:1px solid var(--gold-line)}
+.progress b.on{background:var(--gold);border-color:var(--gold)}
+.q{font-family:var(--font-display);font-size:clamp(22px,3.6vw,32px);line-height:1.4;margin:0 auto;max-width:26ch}
+.choices{display:grid;gap:14px;max-width:660px;margin:24px auto 0;text-align:left}
+@media(min-width:760px){.choices{grid-template-columns:1fr 1fr}}
+.choice{display:flex;gap:16px;align-items:center;padding:16px;min-height:96px;border-radius:20px;cursor:pointer;
+  background:var(--card);border:2px solid var(--gold-line);color:var(--text);
+  font-family:var(--font-body);font-size:1em;line-height:1.45;text-align:left;transition:.14s}
+.choice:hover{background:var(--card-hover);border-color:var(--gold);transform:translateY(-2px)}
+.choice .num{flex:0 0 30px;height:30px;border-radius:50%;background:var(--gold);color:#3A1D00;
+  display:grid;place-items:center;font-weight:700;font-size:15px;font-family:var(--font-display)}
+.choice svg{flex:0 0 60px;width:60px;height:60px}
+body[data-size="lg"] .choice{min-height:112px}
 
-/* ทำนาย */
-.smoke{font-size:70px;animation:pulse 1.6s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.55;transform:scale(.96)}50%{opacity:1;transform:scale(1.06)}}
-.bar{width:min(320px,80vw);height:4px;border-radius:4px;background:rgba(255,255,255,.14);margin:22px auto 0;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--jade),var(--gold))}
+/* กำลังทำนาย */
+.bar{width:min(340px,82vw);height:10px;border-radius:99px;background:var(--card);border:1px solid var(--gold-line);
+  margin:24px auto 0;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .12s linear}
+.spin{width:150px;height:150px;margin:0 auto;animation:sway 2.4s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
 
-/* ผล */
-.badge{font-family:var(--font-display);font-size:12px;letter-spacing:.3em;color:var(--ink);
-  background:var(--gold);display:inline-block;padding:6px 14px;border-radius:999px}
-.title{font-family:var(--font-display);font-size:clamp(28px,5.4vw,46px);margin:14px 0 0;color:var(--gold)}
-.card{background:rgba(255,255,255,.05);border:1px solid rgba(240,200,106,.2);border-radius:20px;
-  padding:22px 24px;max-width:620px;margin:20px auto 0;text-align:left;line-height:1.8;font-size:16px}
-.card h3{font-family:var(--font-display);font-size:14px;letter-spacing:.2em;color:var(--jade);margin:0 0 8px}
-.card p{margin:0 0 16px}
-.tags{display:flex;gap:8px;flex-wrap:wrap}
-.tag{font-size:13px;padding:6px 12px;border-radius:999px;background:rgba(67,217,192,.14);
-  border:1px solid rgba(67,217,192,.4);color:#BFF5EC}
-.power{margin-top:16px}
-.power div{display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:7px}
-.power span{flex:0 0 118px;color:#D8C8E8}
-.power i{flex:1;height:7px;border-radius:4px;background:rgba(255,255,255,.1);position:relative;overflow:hidden}
-.power i::after{content:"";position:absolute;inset:0;width:var(--w);background:linear-gradient(90deg,var(--rose),var(--gold))}
+/* ผลทำนาย */
+.badge{font-family:var(--font-display);font-size:.72em;letter-spacing:.24em;color:#3A1D00;
+  background:var(--gold);display:inline-block;padding:7px 16px;border-radius:999px}
+.title{font-family:var(--font-display);font-size:clamp(28px,5.2vw,44px);margin:12px 0 0;color:var(--gold)}
+.avatar{width:min(190px,54vw);height:auto;margin:6px auto 0;display:block}
+.card{background:var(--card);border:2px solid var(--gold-line);border-radius:22px;
+  padding:22px;max-width:660px;margin:20px auto 0;text-align:left}
+.card h3{font-family:var(--font-display);font-size:.8em;letter-spacing:.16em;color:var(--gold);margin:0 0 6px}
+.card p{margin:0 0 18px}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tag{font-size:.82em;padding:7px 14px;border-radius:999px;background:var(--card-hover);
+  border:1.5px solid var(--gold-line)}
+.power div{display:flex;align-items:center;gap:12px;font-size:.85em;margin-bottom:8px}
+.power span{flex:0 0 40%;color:var(--text-2)}
+.power i{flex:1;height:12px;border-radius:99px;background:var(--card-hover);position:relative;overflow:hidden;
+  border:1px solid var(--gold-line)}
+.power i::after{content:"";position:absolute;inset:0;width:var(--w);background:var(--gold)}
+.all-item{display:flex;gap:14px;align-items:center;margin-bottom:16px}
+.all-item svg{flex:0 0 62px;width:62px;height:62px}
+.all-item b{font-family:var(--font-display);color:var(--gold);display:block}
 
-footer{position:fixed;bottom:12px;left:0;right:0;text-align:center;font-size:11.5px;color:#8C7AA6;z-index:2}
-footer button{background:none;border:0;color:var(--gold-dim);cursor:pointer;font:inherit}
+footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:10px;font-size:14px;
+  color:var(--text-2);z-index:6;background:linear-gradient(0deg,rgba(0,0,0,.3),transparent)}
+body[data-theme="light"] footer{background:linear-gradient(0deg,rgba(0,0,0,.06),transparent)}
+footer button{background:none;border:0;color:var(--text-2);cursor:pointer;font:inherit;
+  text-decoration:underline;min-height:44px}
 
-/* แผงบันทึก */
-.panel{position:fixed;inset:0;background:rgba(10,4,20,.94);z-index:5;padding:28px;overflow:auto}
-.panel .inner{max-width:760px;margin:0 auto;text-align:left}
-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}
-th,td{padding:9px 10px;border-bottom:1px solid rgba(240,200,106,.18);text-align:left}
-th{color:var(--gold);font-weight:600;font-size:12.5px;letter-spacing:.1em}
-.stat{display:flex;gap:26px;flex-wrap:wrap;margin-top:14px}
-.stat div b{display:block;font-family:var(--font-display);font-size:30px;color:var(--gold)}
-.stat div span{font-size:12.5px;color:#B9A8CE}
-.note{font-size:12.5px;color:#9A88B4;margin-top:16px;line-height:1.7}
+.panel{position:fixed;inset:0;background:var(--panel);z-index:9;padding:26px;overflow:auto}
+.panel .inner{max-width:780px;margin:0 auto;text-align:left}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:.85em}
+th,td{padding:10px;border-bottom:1px solid var(--gold-line);text-align:left}
+th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
+.stat{display:flex;gap:28px;flex-wrap:wrap;margin-top:14px}
+.stat div b{display:block;font-family:var(--font-display);font-size:34px;color:var(--gold);line-height:1.2}
+.stat div span{font-size:.8em;color:var(--text-2)}
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
 </style>
 </head>
-<body>
-<canvas id="stars"></canvas>
+<body data-theme="dark" data-size="normal">
+
+<!-- ===== คลังภาพการ์ตูน (SVG) ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+  <g id="g-bg"><circle cx="24" cy="24" r="23" fill="#FFF1D6"/></g>
+</defs>
+
+<!-- ไอคอนตัวเลือก : viewBox 0 0 48 48 -->
+<symbol id="ic-box" viewBox="0 0 48 48"><use href="#g-bg"/><rect x="11" y="19" width="26" height="18" rx="3" fill="#F2A65A" stroke="#3B2555" stroke-width="2"/><rect x="9" y="13" width="30" height="8" rx="2.5" fill="#FFC98B" stroke="#3B2555" stroke-width="2"/><path d="M24 13v24" stroke="#3B2555" stroke-width="2"/></symbol>
+<symbol id="ic-palette" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M24 11c8 0 14 5 14 11 0 4-3 5-6 5h-3c-2 0-3 1-3 3s1 2 1 4-2 3-4 3c-7 0-13-6-13-13S16 11 24 11z" fill="#7ED9C3" stroke="#3B2555" stroke-width="2"/><circle cx="19" cy="20" r="2.3" fill="#FF7EA8"/><circle cx="27" cy="19" r="2.3" fill="#FFD684"/><circle cx="18" cy="28" r="2.3" fill="#8B7BE8"/></symbol>
+<symbol id="ic-gamepad" viewBox="0 0 48 48"><use href="#g-bg"/><rect x="8" y="18" width="32" height="15" rx="7.5" fill="#8B7BE8" stroke="#3B2555" stroke-width="2"/><path d="M16 22v7M12.5 25.5h7" stroke="#FFF7EA" stroke-width="2.4" stroke-linecap="round"/><circle cx="31" cy="23.5" r="2.4" fill="#FF7EA8"/><circle cx="35" cy="28" r="2.4" fill="#7ED9C3"/></symbol>
+<symbol id="ic-wrench" viewBox="0 0 48 48"><use href="#g-bg"/><circle cx="20" cy="20" r="8" fill="none" stroke="#3B2555" stroke-width="3"/><circle cx="20" cy="20" r="3" fill="#FFD684" stroke="#3B2555" stroke-width="2"/><path d="M26 26l9 9" stroke="#8AA6D8" stroke-width="6" stroke-linecap="round"/><path d="M26 26l9 9" stroke="#3B2555" stroke-width="2"/></symbol>
+<symbol id="ic-search" viewBox="0 0 48 48"><use href="#g-bg"/><circle cx="22" cy="21" r="9" fill="#BFEFE4" stroke="#3B2555" stroke-width="2.4"/><path d="M29 28l7 7" stroke="#3B2555" stroke-width="3.4" stroke-linecap="round"/><path d="M18 23v-4M22 23v-7M26 23v-3" stroke="#0F7A66" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-hammer" viewBox="0 0 48 48"><use href="#g-bg"/><rect x="12" y="14" width="20" height="9" rx="2.5" fill="#8AA6D8" stroke="#3B2555" stroke-width="2"/><path d="M21 23l3 13" stroke="#C98B4B" stroke-width="6" stroke-linecap="round"/><path d="M21 23l3 13" stroke="#3B2555" stroke-width="2"/></symbol>
+<symbol id="ic-heart" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M24 35s-11-6.6-11-14a6.4 6.4 0 0 1 11-4.4A6.4 6.4 0 0 1 35 21c0 7.4-11 14-11 14z" fill="#FF7EA8" stroke="#3B2555" stroke-width="2"/><path d="M33 13l1.4 3 3 1.4-3 1.4L33 22l-1.4-3-3-1.4 3-1.4z" fill="#FFD684"/></symbol>
+<symbol id="ic-shield" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M24 11l11 4v10c0 7-5 11-11 13-6-2-11-6-11-13V15z" fill="#7ED9C3" stroke="#3B2555" stroke-width="2"/><path d="M19 24l4 4 7-8" fill="none" stroke="#0F5F50" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-robot" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M24 9v5" stroke="#3B2555" stroke-width="2"/><circle cx="24" cy="8" r="2.4" fill="#FFD684" stroke="#3B2555" stroke-width="1.6"/><rect x="12" y="14" width="24" height="20" rx="6" fill="#8AA6D8" stroke="#3B2555" stroke-width="2"/><circle cx="19" cy="23" r="2.6" fill="#3B2555"/><circle cx="29" cy="23" r="2.6" fill="#3B2555"/><path d="M20 29h8" stroke="#3B2555" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-phone" viewBox="0 0 48 48"><use href="#g-bg"/><rect x="15" y="10" width="18" height="28" rx="4" fill="#FFF7EA" stroke="#3B2555" stroke-width="2"/><rect x="18.5" y="15" width="5" height="5" rx="1.4" fill="#FF7EA8"/><rect x="25.5" y="15" width="5" height="5" rx="1.4" fill="#7ED9C3"/><rect x="18.5" y="22" width="5" height="5" rx="1.4" fill="#FFD684"/><rect x="25.5" y="22" width="5" height="5" rx="1.4" fill="#8B7BE8"/><path d="M21 33h6" stroke="#3B2555" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-planet" viewBox="0 0 48 48"><use href="#g-bg"/><circle cx="24" cy="23" r="9" fill="#8B7BE8" stroke="#3B2555" stroke-width="2"/><path d="M20 20c3 2 6 2 9 0M20 27c3 2 6 2 9 0" stroke="#FFF7EA" stroke-width="1.6"/><ellipse cx="24" cy="25" rx="16" ry="5" fill="none" stroke="#FFD684" stroke-width="2.6" transform="rotate(-18 24 25)"/></symbol>
+<symbol id="ic-door" viewBox="0 0 48 48"><use href="#g-bg"/><rect x="14" y="11" width="20" height="26" rx="3" fill="#C98B4B" stroke="#3B2555" stroke-width="2"/><rect x="18" y="15" width="12" height="14" rx="2" fill="#FFD684"/><circle cx="30" cy="26" r="1.7" fill="#3B2555"/></symbol>
+<symbol id="ic-wall" viewBox="0 0 48 48"><use href="#g-bg"/><g stroke="#3B2555" stroke-width="2" fill="#E58B7B"><rect x="11" y="15" width="12" height="7"/><rect x="25" y="15" width="12" height="7"/><rect x="11" y="24" width="26" height="7"/><rect x="11" y="33" width="12" height="4"/><rect x="25" y="33" width="12" height="4"/></g></symbol>
+<symbol id="ic-flask" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M20 11h8v9l7 12a4 4 0 0 1-3.5 6h-15A4 4 0 0 1 13 32l7-12z" fill="#BFEFE4" stroke="#3B2555" stroke-width="2"/><path d="M16 30h16" stroke="#3B2555" stroke-width="1.6"/><circle cx="21" cy="33" r="2" fill="#7ED9C3"/><circle cx="27" cy="31" r="1.5" fill="#FF7EA8"/></symbol>
+<symbol id="ic-chart" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M12 35h24" stroke="#3B2555" stroke-width="2.4" stroke-linecap="round"/><rect x="15" y="24" width="5.5" height="10" fill="#7ED9C3" stroke="#3B2555" stroke-width="1.8"/><rect x="22" y="18" width="5.5" height="16" fill="#FFD684" stroke="#3B2555" stroke-width="1.8"/><rect x="29" y="13" width="5.5" height="21" fill="#FF7EA8" stroke="#3B2555" stroke-width="1.8"/></symbol>
+<symbol id="ic-chat" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M10 15h20v13H19l-6 5v-5h-3z" fill="#FFF7EA" stroke="#3B2555" stroke-width="2"/><path d="M22 20h16v11h-3v4l-5-4h-8z" fill="#FFD684" stroke="#3B2555" stroke-width="2"/></symbol>
+<symbol id="ic-eye" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M9 24s6-9 15-9 15 9 15 9-6 9-15 9-15-9-15-9z" fill="#FFF7EA" stroke="#3B2555" stroke-width="2"/><circle cx="24" cy="24" r="5" fill="#8B7BE8" stroke="#3B2555" stroke-width="2"/><circle cx="22.4" cy="22.4" r="1.6" fill="#FFF7EA"/></symbol>
+<symbol id="ic-check" viewBox="0 0 48 48"><use href="#g-bg"/><rect x="13" y="11" width="22" height="27" rx="3" fill="#FFF7EA" stroke="#3B2555" stroke-width="2"/><rect x="19" y="8" width="10" height="6" rx="2" fill="#8AA6D8" stroke="#3B2555" stroke-width="2"/><path d="M17.5 21l2.5 2.5 4-4.5M17.5 29l2.5 2.5 4-4.5" stroke="#0F7A66" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M27 21h5M27 29h5" stroke="#3B2555" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-frame" viewBox="0 0 48 48"><use href="#g-bg"/><rect x="10" y="13" width="28" height="22" rx="3" fill="#FFF7EA" stroke="#3B2555" stroke-width="2"/><circle cx="18" cy="20" r="2.4" fill="#FFD684"/><path d="M12 32l7-8 5 5 4-4 8 7z" fill="#7ED9C3" stroke="#3B2555" stroke-width="1.6"/></symbol>
+<symbol id="ic-mega" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M13 21l12-6v18l-12-6z" fill="#FFD684" stroke="#3B2555" stroke-width="2"/><rect x="9" y="20" width="5" height="8" rx="2" fill="#8AA6D8" stroke="#3B2555" stroke-width="2"/><path d="M29 18c2.5 2.5 2.5 9 0 12M33 15c4 4 4 14 0 18" stroke="#FF7EA8" stroke-width="2.4" fill="none" stroke-linecap="round"/></symbol>
+<symbol id="ic-bulb" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M24 11a9 9 0 0 1 5 16.5V31h-10v-3.5A9 9 0 0 1 24 11z" fill="#FFD684" stroke="#3B2555" stroke-width="2"/><rect x="19" y="31" width="10" height="6" rx="2" fill="#8AA6D8" stroke="#3B2555" stroke-width="2"/><path d="M24 8V5M35 15l2-2M13 15l-2-2" stroke="#FF7EA8" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-brain" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M23 12c-5 0-9 3-9 7 0 2 1 3 1 4-1 1-2 2-2 4 0 4 4 6 9 6h1z" fill="#FF9FBD" stroke="#3B2555" stroke-width="2"/><path d="M25 12c5 0 9 3 9 7 0 2-1 3-1 4 1 1 2 2 2 4 0 4-4 6-9 6h-1z" fill="#FFC0D3" stroke="#3B2555" stroke-width="2"/><path d="M24 12v21" stroke="#3B2555" stroke-width="1.6"/></symbol>
+<symbol id="ic-star" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M24 10l4.2 9.4 10.3 1.1-7.7 6.9 2.2 10.1L24 32.2l-9 5.3 2.2-10.1-7.7-6.9 10.3-1.1z" fill="#FFD684" stroke="#3B2555" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="ic-smile" viewBox="0 0 48 48"><use href="#g-bg"/><circle cx="24" cy="24" r="13" fill="#FFD684" stroke="#3B2555" stroke-width="2"/><circle cx="19" cy="21" r="2" fill="#3B2555"/><circle cx="29" cy="21" r="2" fill="#3B2555"/><path d="M17 27c2 3.5 5 5 7 5s5-1.5 7-5" stroke="#3B2555" stroke-width="2.4" fill="none" stroke-linecap="round"/></symbol>
+<symbol id="ic-lock" viewBox="0 0 48 48"><use href="#g-bg"/><path d="M17 21v-4a7 7 0 0 1 14 0v4" fill="none" stroke="#3B2555" stroke-width="2.6"/><rect x="13" y="21" width="22" height="16" rx="4" fill="#7ED9C3" stroke="#3B2555" stroke-width="2"/><circle cx="24" cy="28" r="2.4" fill="#0F5F50"/><path d="M24 30v4" stroke="#0F5F50" stroke-width="2.4" stroke-linecap="round"/></symbol>
+<symbol id="ic-globe" viewBox="0 0 48 48"><use href="#g-bg"/><circle cx="24" cy="24" r="13" fill="#8AA6D8" stroke="#3B2555" stroke-width="2"/><path d="M11 24h26M24 11c4 4 4 22 0 26M24 11c-4 4-4 22 0 26" fill="none" stroke="#FFF7EA" stroke-width="1.8"/><circle cx="24" cy="11" r="2.6" fill="#FFD684" stroke="#3B2555" stroke-width="1.6"/><circle cx="13" cy="30" r="2.6" fill="#FF7EA8" stroke="#3B2555" stroke-width="1.6"/><circle cx="35" cy="30" r="2.6" fill="#7ED9C3" stroke="#3B2555" stroke-width="1.6"/></symbol>
+
+<!-- ตัวการ์ตูนแม่หมอ -->
+<symbol id="fig-seer" viewBox="0 0 300 210">
+  <ellipse cx="150" cy="196" rx="96" ry="12" fill="rgba(0,0,0,.18)"/>
+  <path d="M78 200c6-46 34-62 72-62s66 16 72 62z" fill="#5B3A8C" stroke="#2A1740" stroke-width="3"/>
+  <path d="M96 176c8-9 20-6 26 2" fill="none" stroke="#2A1740" stroke-width="3" stroke-linecap="round"/>
+  <path d="M204 176c-8-9-20-6-26 2" fill="none" stroke="#2A1740" stroke-width="3" stroke-linecap="round"/>
+  <path d="M100 152c-16 8-26 22-28 40 14 4 26 0 34-8z" fill="#F3C9A8" stroke="#2A1740" stroke-width="3"/>
+  <path d="M200 152c16 8 26 22 28 40-14 4-26 0-34-8z" fill="#F3C9A8" stroke="#2A1740" stroke-width="3"/>
+  <ellipse cx="150" cy="96" rx="46" ry="49" fill="#F7D4B4" stroke="#2A1740" stroke-width="3"/>
+  <path d="M104 92c0-34 20-56 46-56s46 22 46 56c6-8 8-20 4-30-8-22-28-34-50-34s-42 12-50 34c-4 10-2 22 4 30z" fill="#7A4FB6" stroke="#2A1740" stroke-width="3"/>
+  <path d="M112 60c14-14 62-14 76 0" fill="none" stroke="#FFD684" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="150" cy="52" r="7" fill="#FFD684" stroke="#2A1740" stroke-width="2.6"/>
+  <path d="M126 96c5-5 13-5 18 0" fill="none" stroke="#2A1740" stroke-width="4" stroke-linecap="round"/>
+  <path d="M156 96c5-5 13-5 18 0" fill="none" stroke="#2A1740" stroke-width="4" stroke-linecap="round"/>
+  <path d="M140 118c6 5 14 5 20 0" fill="none" stroke="#2A1740" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="122" cy="108" r="6" fill="#FF9FBD" opacity=".65"/>
+  <circle cx="178" cy="108" r="6" fill="#FF9FBD" opacity=".65"/>
+  <circle cx="102" cy="106" r="7" fill="none" stroke="#FFD684" stroke-width="3.6"/>
+  <circle cx="198" cy="106" r="7" fill="none" stroke="#FFD684" stroke-width="3.6"/>
+</symbol>
+
+<!-- ตัวการ์ตูนผลทำนาย 6 แบบ : viewBox 0 0 120 120 -->
+<symbol id="av-data" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#2F5FA8"/><path d="M28 112c4-22 16-30 32-30s28 8 32 30z" fill="#BFEFE4" stroke="#22183A" stroke-width="3"/><circle cx="60" cy="56" r="26" fill="#F7D4B4" stroke="#22183A" stroke-width="3"/><path d="M34 50c0-16 12-26 26-26s26 10 26 26c0-22-10-32-26-32S34 28 34 50z" fill="#3B2555"/><circle cx="51" cy="56" r="3" fill="#22183A"/><circle cx="69" cy="56" r="3" fill="#22183A"/><path d="M53 68c4 3 10 3 14 0" stroke="#22183A" stroke-width="3" fill="none" stroke-linecap="round"/><g stroke="#22183A" stroke-width="2.5" fill="#FFD684"><rect x="76" y="86" width="8" height="14"/><rect x="88" y="78" width="8" height="22"/></g></symbol>
+<symbol id="av-dev" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#4E3A96"/><path d="M28 112c4-22 16-30 32-30s28 8 32 30z" fill="#8B7BE8" stroke="#22183A" stroke-width="3"/><circle cx="60" cy="56" r="26" fill="#F3C9A8" stroke="#22183A" stroke-width="3"/><path d="M33 52c2-18 13-28 27-28s25 10 27 28c2-10-2-20-9-25-10-7-26-7-36 0-7 5-11 15-9 25z" fill="#4A3020"/><circle cx="51" cy="56" r="3" fill="#22183A"/><circle cx="69" cy="56" r="3" fill="#22183A"/><path d="M52 68c5 4 11 4 16 0" stroke="#22183A" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="70" y="84" width="30" height="18" rx="3" fill="#FFF7EA" stroke="#22183A" stroke-width="2.6"/><path d="M76 92l4 4-4 4M86 100h8" stroke="#4E3A96" stroke-width="2.6" fill="none" stroke-linecap="round"/></symbol>
+<symbol id="av-ux" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#C9557F"/><path d="M28 112c4-22 16-30 32-30s28 8 32 30z" fill="#FFD684" stroke="#22183A" stroke-width="3"/><circle cx="60" cy="56" r="26" fill="#F7D4B4" stroke="#22183A" stroke-width="3"/><path d="M32 48c8-6 48-6 56 0 4-10-8-24-28-24S28 38 32 48z" fill="#7ED9C3" stroke="#22183A" stroke-width="3"/><circle cx="51" cy="56" r="3" fill="#22183A"/><circle cx="69" cy="56" r="3" fill="#22183A"/><path d="M53 68c4 3 10 3 14 0" stroke="#22183A" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M84 96l14-14" stroke="#C98B4B" stroke-width="6" stroke-linecap="round"/><path d="M80 100l6-6 6 6-6 6z" fill="#FF7EA8" stroke="#22183A" stroke-width="2.4"/></symbol>
+<symbol id="av-game" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#1F7F6E"/><path d="M28 112c4-22 16-30 32-30s28 8 32 30z" fill="#FF9FBD" stroke="#22183A" stroke-width="3"/><circle cx="60" cy="56" r="26" fill="#F3C9A8" stroke="#22183A" stroke-width="3"/><path d="M34 50c0-16 12-26 26-26s26 10 26 26c2-24-12-32-26-32S32 26 34 50z" fill="#22183A"/><path d="M32 48h56v8H32z" fill="#8B7BE8" stroke="#22183A" stroke-width="2.6"/><circle cx="51" cy="62" r="3" fill="#22183A"/><circle cx="69" cy="62" r="3" fill="#22183A"/><path d="M53 72c4 3 10 3 14 0" stroke="#22183A" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="72" y="88" width="28" height="13" rx="6.5" fill="#FFD684" stroke="#22183A" stroke-width="2.4"/><path d="M79 92v6M76 95h6" stroke="#22183A" stroke-width="2.2" stroke-linecap="round"/><circle cx="93" cy="94.5" r="2.2" fill="#C9557F"/></symbol>
+<symbol id="av-sec" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#22406B"/><path d="M28 112c4-22 16-30 32-30s28 8 32 30z" fill="#7ED9C3" stroke="#22183A" stroke-width="3"/><circle cx="60" cy="56" r="26" fill="#F7D4B4" stroke="#22183A" stroke-width="3"/><path d="M30 46h60c-2-14-14-22-30-22s-28 8-30 22z" fill="#3B2555" stroke="#22183A" stroke-width="3"/><path d="M26 46h68" stroke="#FFD684" stroke-width="5" stroke-linecap="round"/><circle cx="51" cy="58" r="3" fill="#22183A"/><circle cx="69" cy="58" r="3" fill="#22183A"/><path d="M53 69c4 3 10 3 14 0" stroke="#22183A" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M84 82l14 5v10c0 8-6 11-14 14-8-3-14-6-14-14V87z" fill="#FFD684" stroke="#22183A" stroke-width="2.6"/><path d="M78 96l4 4 7-8" stroke="#22183A" stroke-width="2.6" fill="none" stroke-linecap="round"/></symbol>
+<symbol id="av-net" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#2E7D8F"/><path d="M28 112c4-22 16-30 32-30s28 8 32 30z" fill="#FFD684" stroke="#22183A" stroke-width="3"/><circle cx="60" cy="56" r="26" fill="#F3C9A8" stroke="#22183A" stroke-width="3"/><path d="M34 52c0-18 12-28 26-28s26 10 26 28c4-22-10-34-26-34S30 30 34 52z" fill="#4A3020"/><circle cx="51" cy="56" r="3" fill="#22183A"/><circle cx="69" cy="56" r="3" fill="#22183A"/><path d="M53 68c4 3 10 3 14 0" stroke="#22183A" stroke-width="3" fill="none" stroke-linecap="round"/><g stroke="#BFEFE4" stroke-width="2.6"><path d="M86 84l-10 10M86 84l10 10"/></g><circle cx="86" cy="82" r="5" fill="#FFF7EA" stroke="#22183A" stroke-width="2.4"/><circle cx="74" cy="98" r="5" fill="#FF9FBD" stroke="#22183A" stroke-width="2.4"/><circle cx="98" cy="98" r="5" fill="#7ED9C3" stroke="#22183A" stroke-width="2.4"/></symbol>
+</svg>
+
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<!-- แถบเครื่องมือ -->
+<div class="tools">
+  <button class="tool" id="tSize">ตัวอักษรใหญ่ขึ้น</button>
+  <button class="tool" id="tTheme">โหมดพื้นสว่าง</button>
+  <button class="tool" id="tCam">ปิดกล้อง</button>
+  <button class="tool" id="tRestart">เริ่มใหม่</button>
+</div>
+
 <div class="wrap">
 
   <!-- หน้าเริ่ม -->
   <section class="stage" id="s-intro">
-    <p class="eyebrow">IT · มทร.ล้านนา ลำปาง</p>
+    <p class="eyebrow">หลักสูตรเทคโนโลยีสารสนเทศ · มทร.ล้านนา ลำปาง</p>
     <h1>แม่หมอ <span>VR</span></h1>
-    <div class="rule"><i></i><b></b><i></i></div>
-    <div class="orb-holder">
-      <div class="orb">
-        <video id="cam" autoplay muted playsinline></video>
-        <div class="orb-glass"></div>
-        <p class="orb-cta" id="camHint">กำลังเปิดลูกแก้ว…</p>
+    <div class="seer">
+      <svg class="fig" viewBox="0 0 300 210" role="img" aria-label="ภาพการ์ตูนแม่หมอนั่งอยู่หลังลูกแก้ว"><use href="#fig-seer"/></svg>
+      <div class="orb-holder">
+        <div class="orb">
+          <video id="cam" autoplay muted playsinline aria-hidden="true"></video>
+          <div class="orb-glass"></div>
+        </div>
       </div>
-      <div class="orb-base"></div>
     </div>
-    <p class="lead">ตอบ 7 คำถามสั้น ๆ แล้วแม่หมอจะอ่านพลังความถนัดของเจ้า<br>ว่าอนาคตสายดิจิทัลของเจ้าอยู่ทางไหน</p>
-    <div class="row">
-      <button class="btn" id="go">เปิดคำทำนาย</button>
-    </div>
-    <p class="note" style="text-align:center">ใช้เวลา 3–5 นาที · ไม่เก็บชื่อหรือข้อมูลส่วนตัวใด ๆ</p>
+    <p class="lead">ตอบคำถามง่าย ๆ 6 ข้อ แล้วแม่หมอจะทำนายว่าคุณเหมาะกับงานสายไอทีแบบไหน<br>ไม่มีคำตอบผิด ไม่ต้องเคยเรียนคอมพิวเตอร์มาก่อน</p>
+    <div class="row"><button class="btn" id="go">เริ่มเปิดคำทำนาย</button></div>
+    <p class="small" style="margin-top:14px">ใช้เวลาประมาณ 3 นาที · ไม่ถามชื่อและไม่เก็บข้อมูลส่วนตัว<br>
+      <span id="camMsg">กำลังเปิดกล้อง…</span></p>
   </section>
 
   <!-- คำถาม -->
   <section class="stage hidden" id="s-quiz">
-    <div class="track" id="track"></div>
-    <p class="qn" id="qn">ข้อ 1</p>
+    <div class="progress">
+      <p id="qn">ข้อ 1 จาก 6</p>
+      <div class="track" id="track" aria-hidden="true"></div>
+    </div>
     <h2 class="q" id="qtext"></h2>
-    <div class="choices" id="choices"></div>
+    <p class="small" style="margin-top:10px">เลือกข้อที่ใกล้เคียงตัวคุณที่สุด (กดตัวเลข 1–5 บนคีย์บอร์ดก็ได้)</p>
+    <div class="choices" id="choices" role="group" aria-labelledby="qtext"></div>
     <div class="row"><button class="btn ghost small" id="back">ย้อนกลับ</button></div>
   </section>
 
   <!-- กำลังทำนาย -->
   <section class="stage hidden" id="s-wait">
-    <div class="smoke">🔮</div>
-    <h2 class="q" id="waitText">แม่หมอกำลังอ่านพลังความถนัดของเจ้า…</h2>
+    <svg class="spin" viewBox="0 0 300 210" aria-hidden="true"><use href="#fig-seer"/></svg>
+    <h2 class="q">แม่หมอกำลังอ่านพลังความถนัดของคุณ…</h2>
     <div class="bar"><i id="barFill"></i></div>
-    <p class="lead" id="waveHint">โบกมือหน้ากล้องเพื่อปลุกลูกแก้ว</p>
-    <div class="row"><button class="btn small" id="reveal">เปิดคำทำนายเลย</button></div>
+    <p class="lead" id="waveHint">โบกมือหน้ากล้องเพื่อเปิดคำทำนาย หรือกดปุ่มด้านล่าง</p>
+    <div class="row"><button class="btn" id="reveal">เปิดคำทำนาย</button></div>
   </section>
 
   <!-- ผลทำนาย -->
   <section class="stage hidden" id="s-result">
-    <span class="badge">คำทำนายของเจ้า</span>
+    <span class="badge">คำทำนายของคุณ</span>
+    <svg class="avatar" id="rAvatar" viewBox="0 0 120 120" role="img" aria-label="ภาพการ์ตูนของสายอาชีพที่ทำนายได้"><use href="#av-data" id="rAvatarUse"/></svg>
     <h2 class="title" id="rTitle"></h2>
     <p class="lead" id="rTagline"></p>
     <div class="card">
-      <h3>แม่หมอเห็นอะไรในตัวเจ้า</h3>
+      <h3>แม่หมอเห็นอะไรในตัวคุณ</h3>
       <p id="rWho"></p>
       <h3>ทำไมจึงเหมาะกับสายนี้</h3>
       <p id="rWhy"></p>
       <h3>สายอาชีพที่รออยู่</h3>
       <div class="tags" id="rJobs"></div>
+      <h3>พลังสามอันดับแรกของคุณ</h3>
       <div class="power" id="rPower"></div>
     </div>
     <div class="row">
       <button class="btn" id="again">เล่นอีกครั้ง</button>
-      <button class="btn ghost small" id="share">ดูสายอาชีพทั้งหมด</button>
+      <button class="btn ghost small" id="showAll">ดูสายอาชีพทั้ง 6 แบบ</button>
     </div>
   </section>
 
   <!-- สายอาชีพทั้งหมด -->
   <section class="stage hidden" id="s-all">
-    <h1 style="font-size:28px">สายอาชีพทั้ง 6 ในคำทำนาย</h1>
+    <h1 style="font-size:30px">สายอาชีพทั้ง 6 แบบ</h1>
     <div class="rule"><i></i><b></b><i></i></div>
-    <div id="allList" class="card" style="max-width:660px"></div>
-    <div class="row"><button class="btn small" id="closeAll">กลับ</button></div>
+    <div class="card" id="allList"></div>
+    <div class="row"><button class="btn small" id="closeAll">กลับไปดูคำทำนาย</button></div>
   </section>
 </div>
 
-<footer>
-  แม่หมอ VR · เล่นแบบออฟไลน์ได้ · <button id="logBtn">บันทึกผู้เข้าร่วม (L)</button>
-</footer>
+<footer>ไม่เก็บชื่อและข้อมูลส่วนตัว · <button id="logBtn">บันทึกผู้เข้าร่วม (กด L)</button></footer>
 
 <!-- แผงบันทึกผู้เข้าร่วม -->
-<div class="panel hidden" id="panel">
+<div class="panel hidden" id="panel" role="dialog" aria-label="บันทึกผู้เข้าร่วมกิจกรรม">
   <div class="inner">
     <p class="eyebrow">สำหรับเจ้าหน้าที่บูธ</p>
-    <h1 style="font-size:28px">บันทึกผู้เข้าร่วมกิจกรรม</h1>
+    <h1 style="font-size:30px">บันทึกผู้เข้าร่วมกิจกรรม</h1>
     <div class="stat">
       <div><b id="cToday">0</b><span>วันนี้</span></div>
       <div><b id="cAll">0</b><span>ทั้งหมด</span></div>
       <div><b id="cDays">0</b><span>จำนวนวันที่จัด</span></div>
-      <div><b id="cTop">—</b><span>ผลที่ออกบ่อยสุด</span></div>
+      <div><b id="cTop" style="font-size:20px">—</b><span>ผลที่ออกบ่อยที่สุด</span></div>
     </div>
     <div class="row" style="justify-content:flex-start">
-      <button class="btn small" id="csv">ดาวน์โหลด CSV</button>
+      <button class="btn small" id="csv">ดาวน์โหลดไฟล์ CSV</button>
       <button class="btn ghost small" id="clear">ล้างข้อมูล</button>
-      <button class="btn ghost small" id="closePanel">ปิด</button>
+      <button class="btn ghost small" id="closePanel">ปิดหน้านี้</button>
     </div>
     <table><thead><tr><th>วันที่</th><th>เวลา</th><th>รอบ (Session)</th><th>ผลการทำนาย</th><th>ใช้เวลา</th></tr></thead>
     <tbody id="logRows"></tbody></table>
-    <p class="note">บันทึกเฉพาะวันที่ เวลา หมายเลขรอบที่ระบบสร้างอัตโนมัติ ผลการทำนาย และเวลาที่ใช้เล่น<br>
-    ไม่มีการเก็บชื่อ นามสกุล เบอร์โทร โรงเรียน หรือภาพจากกล้อง · ภาพจากกล้องใช้แสดงในลูกแก้วและตรวจจับการโบกมือเท่านั้น ไม่มีการอัดหรือส่งออกจากเครื่อง</p>
+    <p class="small" style="margin-top:16px">บันทึกเฉพาะวันที่ เวลา หมายเลขรอบที่ระบบสร้างอัตโนมัติ ผลการทำนาย และเวลาที่ใช้เล่น
+      ไม่มีการเก็บชื่อ นามสกุล โรงเรียน หรือเบอร์โทร ภาพจากกล้องใช้แสดงในลูกแก้วและตรวจจับการโบกมือเท่านั้น ไม่ถูกบันทึกหรือส่งออกจากเครื่อง</p>
   </div>
 </div>
 
 <canvas id="motion" width="64" height="48" class="hidden"></canvas>
 
 <script>
-/* ---------- ข้อมูลสายอาชีพ ---------- */
+/* ---------- สายอาชีพ 6 กลุ่ม ---------- */
 const PATHS = {
-  data:{name:"นักอ่านอนาคตจากข้อมูล",tagline:"เจ้ามองตัวเลขแล้วเห็นเรื่องราวที่คนอื่นมองไม่เห็น",
-    who:"เจ้าเป็นคนช่างสังเกต ชอบหาความจริงจากข้อมูลมากกว่าเดา เวลาเจอปัญหาเจ้าจะถามหาสาเหตุก่อนลงมือทำ และรู้สึกสนุกเวลาจับรูปแบบซ้ำ ๆ ในสิ่งที่ดูยุ่งเหยิงได้",
-    why:"งานสาย AI และข้อมูลต้องการคนที่อดทนกับรายละเอียด ตั้งคำถามเก่ง และเชื่อหลักฐานมากกว่าความรู้สึก ซึ่งเป็นนิสัยที่เจ้ามีอยู่แล้ว",
+  data:{icon:"av-data",name:"นักอ่านอนาคตจากข้อมูล",
+    tagline:"คุณมองตัวเลขแล้วเห็นเรื่องราวที่คนอื่นมองไม่เห็น",
+    who:"คุณเป็นคนช่างสังเกต ชอบหาความจริงก่อนตัดสินใจ เวลาเจอปัญหาคุณจะถามหาสาเหตุก่อนลงมือทำ และรู้สึกสนุกเวลาจับรูปแบบซ้ำ ๆ ในสิ่งที่ดูยุ่งเหยิงได้",
+    why:"งานสาย AI และข้อมูลต้องการคนที่ใจเย็นกับรายละเอียด ตั้งคำถามเก่ง และเชื่อหลักฐานมากกว่าความรู้สึก ซึ่งเป็นนิสัยที่คุณมีอยู่แล้ว",
     jobs:["Data Analyst","AI / Machine Learning","Business Intelligence","นักวิจัยข้อมูล"]},
-  dev:{name:"นักสร้างเครื่องจักรความคิด",tagline:"เจ้าคิดอะไรได้ ก็อยากทำให้มันใช้งานได้จริง",
-    who:"เจ้าเป็นคนลงมือ ชอบแกะดูว่าอะไรทำงานยังไง และไม่กลัวลองผิดลองถูกจนกว่าจะสำเร็จ ความสุขของเจ้าคือเห็นสิ่งที่ตัวเองสร้างทำงานได้",
-    why:"การเขียนโปรแกรมคือการแก้ปัญหาซ้ำ ๆ จนกว่าจะได้ผล คนที่ไปได้ไกลไม่ใช่คนเก่งที่สุด แต่เป็นคนที่ยังลองต่อ ซึ่งตรงกับเจ้า",
+  dev:{icon:"av-dev",name:"นักสร้างเครื่องจักรความคิด",
+    tagline:"คิดอะไรได้ คุณก็อยากทำให้มันใช้งานได้จริง",
+    who:"คุณเป็นคนลงมือทำ ชอบแกะดูว่าอะไรทำงานอย่างไร และไม่กลัวลองผิดลองถูกจนกว่าจะสำเร็จ ความสุขของคุณคือเห็นสิ่งที่ตัวเองสร้างทำงานได้",
+    why:"การเขียนโปรแกรมคือการแก้ปัญหาซ้ำ ๆ จนกว่าจะได้ผล คนที่ไปได้ไกลไม่ใช่คนเก่งที่สุด แต่เป็นคนที่ยังลองต่อ ซึ่งตรงกับคุณ",
     jobs:["Software Developer","Web Developer","Mobile Developer","System Analyst"]},
-  ux:{name:"นักสร้างสรรค์ดิจิทัล",tagline:"เจ้าใส่ใจว่าคนอื่นจะรู้สึกอย่างไรกับสิ่งที่เจ้าทำ",
-    who:"เจ้ามองเห็นความสวยงามและความรู้สึกของคน เวลามีใครใช้ของแล้วสับสน เจ้าจะรู้สึกว่ามันน่าจะทำให้ง่ายกว่านี้ได้ และเจ้าชอบทำให้สิ่งของดูดีขึ้น",
-    why:"งาน UX/UI คือการเข้าใจคนก่อนออกแบบหน้าจอ ทักษะสำคัญคือความเห็นอกเห็นใจและสายตาที่ละเอียด ไม่ใช่การเขียนโค้ดเก่ง",
+  ux:{icon:"av-ux",name:"นักสร้างสรรค์ดิจิทัล",
+    tagline:"คุณใส่ใจว่าคนอื่นจะรู้สึกอย่างไรกับสิ่งที่คุณทำ",
+    who:"คุณมองเห็นความสวยงามและความรู้สึกของคน เวลามีใครใช้ของแล้วสับสน คุณจะคิดว่ามันน่าจะทำให้ง่ายกว่านี้ได้ และคุณชอบทำให้สิ่งของดูดีขึ้น",
+    why:"งาน UX/UI คือการเข้าใจคนก่อนออกแบบหน้าจอ ทักษะสำคัญคือความเข้าใจผู้อื่นและสายตาที่ละเอียด ไม่ใช่การเขียนโค้ดเก่งที่สุด",
     jobs:["UX/UI Designer","Digital Media","Content Creator","Product Designer"]},
-  game:{name:"ผู้สร้างโลกใบใหม่",tagline:"ในหัวของเจ้ามีโลกที่ยังไม่มีใครได้เข้าไปเล่น",
-    who:"เจ้าชอบเรื่องเล่า ตัวละคร และความสนุก เวลาเล่นเกมเจ้าไม่ได้แค่เล่น แต่คิดต่อว่าถ้าเป็นเกมของเราจะทำให้ต่างออกไปอย่างไร",
+  game:{icon:"av-game",name:"ผู้สร้างโลกใบใหม่",
+    tagline:"ในหัวของคุณมีโลกที่ยังไม่มีใครได้เข้าไปเล่น",
+    who:"คุณชอบเรื่องเล่า ตัวละคร และความสนุก เวลาเล่นเกมคุณไม่ได้แค่เล่น แต่คิดต่อว่าถ้าเป็นเกมของเราจะทำให้ต่างออกไปอย่างไร",
     why:"การทำเกมต้องรวมศิลปะ ตรรกะ และความเข้าใจคนเล่นเข้าด้วยกัน คนที่ชอบทั้งจินตนาการและการลงมือทำจะเติบโตในสายนี้ได้ดี",
     jobs:["Game Developer","Game Designer","3D / Animation","AR/VR Developer"]},
-  sec:{name:"ผู้พิทักษ์เงามืด",tagline:"เจ้าเห็นช่องโหว่ที่คนอื่นเดินผ่านไปเฉย ๆ",
-    who:"เจ้าเป็นคนระแวดระวัง ไม่เชื่ออะไรง่าย ๆ และชอบคิดว่าถ้ามีคนตั้งใจโกงระบบนี้ เขาจะทำจากทางไหน เจ้ารู้สึกดีเวลาได้ปกป้องคนอื่น",
+  sec:{icon:"av-sec",name:"ผู้พิทักษ์เงามืด",
+    tagline:"คุณเห็นช่องโหว่ที่คนอื่นเดินผ่านไปเฉย ๆ",
+    who:"คุณเป็นคนระวังตัว ไม่เชื่ออะไรง่าย ๆ และชอบคิดว่าถ้ามีคนตั้งใจโกงระบบนี้ เขาจะทำจากทางไหน คุณรู้สึกดีเวลาได้ปกป้องคนอื่น",
     why:"งานความปลอดภัยไซเบอร์ต้องการคนที่คิดต่างจากคนทั่วไป มองหาจุดอ่อนก่อนคนร้ายจะเจอ และมีวินัยกับกฎเกณฑ์",
     jobs:["Cybersecurity","Penetration Tester","IT Auditor","Security Operations"]},
-  net:{name:"ผู้เชื่อมสายใยจักรวาล",tagline:"ถ้าไม่มีเจ้า ทุกอย่างจะหยุดเชื่อมต่อกัน",
-    who:"เจ้าเป็นคนที่คนอื่นพึ่งได้ ชอบให้ทุกอย่างเรียบร้อยเป็นระบบ และพอใจเวลาทุกส่วนทำงานประสานกันได้ราบรื่น",
+  net:{icon:"av-net",name:"ผู้เชื่อมสายใยจักรวาล",
+    tagline:"ถ้าไม่มีคุณ ทุกอย่างจะหยุดเชื่อมต่อกัน",
+    who:"คุณเป็นคนที่คนอื่นพึ่งได้ ชอบให้ทุกอย่างเรียบร้อยเป็นระบบ และพอใจเวลาทุกส่วนทำงานประสานกันได้ราบรื่น",
     why:"ระบบเครือข่ายและคลาวด์คือกระดูกสันหลังของทุกองค์กร ต้องการคนที่ละเอียด รับผิดชอบ และแก้ปัญหาเฉพาะหน้าได้",
     jobs:["Network Engineer","Cloud / DevOps","System Administrator","IT Support ระดับสูง"]}
 };
 
-/* ---------- คำถาม 7 ข้อ (สถานการณ์ ไม่ต้องมีพื้นความรู้ IT) ---------- */
+/* ---------- คำถาม 6 ข้อ ใช้ภาพการ์ตูนประกอบทุกตัวเลือก ---------- */
 const QUESTIONS = [
-  {q:"วันหยุดที่ว่างทั้งวัน เจ้าอยากทำอะไรที่สุด?",a:[
-    {e:"🗂️",t:"จัดของ จัดตาราง ให้ทุกอย่างเข้าที่",s:{data:2,net:2,sec:1}},
-    {e:"🎨",t:"วาดรูป ตัดต่อคลิป หรือแต่งห้องใหม่",s:{ux:3,game:1}},
-    {e:"🎮",t:"เล่นเกม แล้วคิดว่าถ้าเป็นเกมของเราจะทำต่างออกไป",s:{game:3,dev:1}},
-    {e:"🔧",t:"แกะของเล่นหรือเครื่องใช้ ดูข้างในว่าทำงานยังไง",s:{dev:2,sec:2,net:1}}]},
-  {q:"เพื่อนมาเล่าปัญหาให้ฟัง เจ้ามักทำอะไรก่อน?",a:[
-    {e:"🔍",t:"ถามรายละเอียดเยอะ ๆ แล้วสรุปให้ฟังว่าปัญหาจริงคืออะไร",s:{data:3,sec:1}},
-    {e:"🛠️",t:"หาวิธีแก้ให้เลย ลงมือช่วยทำด้วย",s:{dev:3,net:1}},
-    {e:"🤝",t:"ฟังความรู้สึกเขาก่อน ให้เขารู้สึกดีขึ้น",s:{ux:3}},
-    {e:"🛡️",t:"เตือนว่าอย่าเชื่อใครง่าย ๆ เดี๋ยวโดนหลอกอีก",s:{sec:3}}]},
-  {q:"ถ้าเสกอะไรก็ได้หนึ่งอย่าง เจ้าจะเสกอะไร?",a:[
-    {e:"🤖",t:"หุ่นยนต์ที่ทายใจคนได้แม่นมาก",s:{data:3,dev:1}},
-    {e:"📱",t:"แอปที่คนทั้งโรงเรียนต้องใช้",s:{dev:3,ux:1}},
-    {e:"🌌",t:"โลกอีกใบที่มีเรื่องราวของตัวเอง",s:{game:3}},
-    {e:"🚪",t:"ประตูวิเศษที่เชื่อมทุกที่เข้าหากัน",s:{net:3}},
-    {e:"🏯",t:"กำแพงที่ไม่มีใครเจาะเข้ามาได้",s:{sec:3}}]},
-  {q:"เจอปัญหาที่ยังไม่รู้วิธีแก้เลย เจ้าจะ...",a:[
-    {e:"🧪",t:"ลองผิดลองถูกเองไปเรื่อย ๆ จนกว่าจะได้",s:{dev:3,game:1}},
-    {e:"📊",t:"หาข้อมูลก่อน ดูว่าคนอื่นเจอแบบนี้แล้วเป็นยังไง",s:{data:3}},
-    {e:"🗣️",t:"ชวนคนอื่นมาช่วยคิด แบ่งงานกันทำ",s:{net:2,ux:2}},
-    {e:"🕵️",t:"มองหาช่องที่คนอื่นมองข้ามไป",s:{sec:3}}]},
-  {q:"เวลาทำงานกลุ่ม เจ้ามักได้บทบาทไหน?",a:[
-    {e:"✅",t:"คนตรวจความถูกต้อง คุมตัวเลข",s:{data:3,sec:1}},
-    {e:"⚙️",t:"คนลงมือทำชิ้นงานจริง",s:{dev:3,game:1}},
-    {e:"🖼️",t:"คนทำสไลด์และออกแบบให้สวย",s:{ux:3}},
-    {e:"📣",t:"คนประสานงาน คุยกับทุกฝ่าย จัดคิวงาน",s:{net:3}},
-    {e:"💡",t:"คนคิดไอเดียสนุก ๆ ให้ทีม",s:{game:3,ux:1}}]},
-  {q:"คำชมแบบไหนที่ทำให้เจ้ายิ้มที่สุด?",a:[
-    {e:"🧠",t:"คิดได้ไงเนี่ย ฉลาดมาก",s:{data:2,dev:2}},
-    {e:"✨",t:"สวยจัง น่าใช้จัง",s:{ux:3}},
-    {e:"😄",t:"สนุกมาก เล่นเพลินเลย",s:{game:3}},
-    {e:"🔒",t:"อยู่กับเธอแล้วรู้สึกปลอดภัย",s:{sec:3}},
-    {e:"🌐",t:"ขาดเธอไม่ได้เลย ไม่มีเธอทุกอย่างพัง",s:{net:3}}]},
-  {q:"ถ้าได้พลังวิเศษหนึ่งอย่างในวันสอบ เจ้าเลือกอะไร?",a:[
-    {e:"💭",t:"อ่านใจคนได้",s:{ux:2,data:2}},
-    {e:"⏸️",t:"หยุดเวลาเพื่อทำงานให้ทัน",s:{dev:3}},
-    {e:"🪄",t:"เสกสิ่งของขึ้นมาจากอากาศ",s:{game:2,dev:1}},
-    {e:"👻",t:"ล่องหนได้",s:{sec:3}},
-    {e:"⚡",t:"เทเลพอร์ตไปไหนก็ได้",s:{net:3}}]}
+  {q:"วันหยุดที่ว่างทั้งวัน คุณอยากทำอะไรที่สุด",a:[
+    {ic:"ic-box",t:"จัดของ จัดตาราง ให้ทุกอย่างเข้าที่",s:{data:2,net:2,sec:1}},
+    {ic:"ic-palette",t:"วาดรูป ตัดต่อคลิป หรือแต่งห้องใหม่",s:{ux:3,game:1}},
+    {ic:"ic-gamepad",t:"เล่นเกม แล้วคิดว่าถ้าเป็นเกมของเราจะทำต่างออกไป",s:{game:3,dev:1}},
+    {ic:"ic-wrench",t:"แกะของเล่นหรือเครื่องใช้ ดูข้างในว่าทำงานอย่างไร",s:{dev:2,sec:2,net:1}}]},
+  {q:"เพื่อนมาเล่าปัญหาให้ฟัง คุณมักทำอะไรก่อน",a:[
+    {ic:"ic-search",t:"ถามรายละเอียดเยอะ ๆ แล้วสรุปให้ฟังว่าปัญหาจริงคืออะไร",s:{data:3,sec:1}},
+    {ic:"ic-hammer",t:"หาวิธีแก้ให้เลย ลงมือช่วยทำด้วย",s:{dev:3,net:1}},
+    {ic:"ic-heart",t:"ฟังความรู้สึกเขาก่อน ให้เขารู้สึกดีขึ้น",s:{ux:3}},
+    {ic:"ic-shield",t:"เตือนว่าอย่าเชื่อใครง่าย ๆ เดี๋ยวโดนหลอกอีก",s:{sec:3}}]},
+  {q:"ถ้าเสกอะไรก็ได้หนึ่งอย่าง คุณจะเสกอะไร",a:[
+    {ic:"ic-robot",t:"หุ่นยนต์ที่ทายใจคนได้แม่นมาก",s:{data:3,dev:1}},
+    {ic:"ic-phone",t:"แอปที่คนทั้งโรงเรียนต้องใช้",s:{dev:3,ux:1}},
+    {ic:"ic-planet",t:"โลกอีกใบที่มีเรื่องราวของตัวเอง",s:{game:3}},
+    {ic:"ic-door",t:"ประตูวิเศษที่เชื่อมทุกที่เข้าหากัน",s:{net:3}},
+    {ic:"ic-wall",t:"กำแพงที่ไม่มีใครเจาะเข้ามาได้",s:{sec:3}}]},
+  {q:"เจอปัญหาที่ยังไม่รู้วิธีแก้เลย คุณจะทำอย่างไร",a:[
+    {ic:"ic-flask",t:"ลองผิดลองถูกเองไปเรื่อย ๆ จนกว่าจะได้",s:{dev:3,game:1}},
+    {ic:"ic-chart",t:"หาข้อมูลก่อน ดูว่าคนอื่นเจอแบบนี้แล้วเป็นอย่างไร",s:{data:3}},
+    {ic:"ic-chat",t:"ชวนคนอื่นมาช่วยคิด แบ่งงานกันทำ",s:{net:2,ux:2}},
+    {ic:"ic-eye",t:"มองหาช่องที่คนอื่นมองข้ามไป",s:{sec:3}}]},
+  {q:"เวลาทำงานกลุ่ม คุณมักได้บทบาทไหน",a:[
+    {ic:"ic-check",t:"คนตรวจความถูกต้อง คุมตัวเลข",s:{data:3,sec:1}},
+    {ic:"ic-wrench",t:"คนลงมือทำชิ้นงานจริง",s:{dev:3,game:1}},
+    {ic:"ic-frame",t:"คนทำสไลด์และออกแบบให้สวย",s:{ux:3}},
+    {ic:"ic-mega",t:"คนประสานงาน คุยกับทุกฝ่าย จัดคิวงาน",s:{net:3}},
+    {ic:"ic-bulb",t:"คนคิดไอเดียสนุก ๆ ให้ทีม",s:{game:3,ux:1}}]},
+  {q:"คำชมแบบไหนที่ทำให้คุณยิ้มที่สุด",a:[
+    {ic:"ic-brain",t:"คิดได้อย่างไรเนี่ย ฉลาดมาก",s:{data:2,dev:2}},
+    {ic:"ic-star",t:"สวยจัง น่าใช้จัง",s:{ux:3}},
+    {ic:"ic-smile",t:"สนุกมาก เล่นเพลินเลย",s:{game:3}},
+    {ic:"ic-lock",t:"อยู่กับเธอแล้วรู้สึกปลอดภัย",s:{sec:3}},
+    {ic:"ic-globe",t:"ขาดเธอไม่ได้เลย ไม่มีเธอทุกอย่างพัง",s:{net:3}}]}
 ];
 
-/* ---------- สถานะเกม ---------- */
-const KEY="maemorvr_log_v1";
-let qi=0, scores={}, answers=[], startedAt=0;
+/* ---------- สถานะ ---------- */
+const KEY="maemorvr_log_v2";
+const STAGES=["s-intro","s-quiz","s-wait","s-result","s-all"];
+let qi=0, scores={}, answers=[], startedAt=0, waiting=false, barTimer=null;
 const $=id=>document.getElementById(id);
-const show=id=>{["s-intro","s-quiz","s-wait","s-result","s-all"].forEach(s=>$(s).classList.toggle("hidden",s!==id));};
-
+function show(id){
+  STAGES.forEach(s=>$(s).classList.toggle("hidden",s!==id));
+  window.scrollTo(0,0);
+  const f=$(id).querySelector("button");if(f)f.focus({preventScroll:true});
+}
 function resetScores(){scores={};Object.keys(PATHS).forEach(k=>scores[k]=0);answers=[];}
 
+/* ---------- คำถาม ---------- */
 function renderQ(){
-  $("track").innerHTML=QUESTIONS.map((_,i)=>`<b class="${i<=qi?'on':''}"></b>`).join("");
   $("qn").textContent="ข้อ "+(qi+1)+" จาก "+QUESTIONS.length;
+  $("track").innerHTML=QUESTIONS.map((_,i)=>`<b class="${i<=qi?'on':''}"></b>`).join("");
   $("qtext").textContent=QUESTIONS[qi].q;
-  $("choices").innerHTML="";
+  const box=$("choices");box.innerHTML="";
   QUESTIONS[qi].a.forEach((opt,i)=>{
     const b=document.createElement("button");
-    b.className="choice";b.innerHTML=`<em>${opt.e}</em><span>${opt.t}</span>`;
+    b.className="choice";b.type="button";
+    b.innerHTML=`<span class="num" aria-hidden="true">${i+1}</span>`+
+      `<svg viewBox="0 0 48 48" aria-hidden="true"><use href="#${opt.ic}"/></svg>`+
+      `<span>${opt.t}</span>`;
     b.onclick=()=>pick(i);
-    $("choices").appendChild(b);
+    box.appendChild(b);
   });
   $("back").classList.toggle("hidden",qi===0);
 }
 function pick(i){
+  if($("s-quiz").classList.contains("hidden"))return;
   answers[qi]=i;
-  const s=QUESTIONS[qi].a[i].s;
-  for(const k in s) scores[k]+=s[k];
+  const s=QUESTIONS[qi].a[i].s;for(const k in s)scores[k]+=s[k];
   qi++;
-  if(qi<QUESTIONS.length){show("s-quiz");renderQ();} else divine();
+  if(qi<QUESTIONS.length){renderQ();$("choices").querySelector("button").focus({preventScroll:true});}
+  else divine();
 }
-$("back").onclick=()=>{
-  qi--;const s=QUESTIONS[qi].a[answers[qi]].s;for(const k in s) scores[k]-=s[k];renderQ();
-};
+$("back").onclick=()=>{if(qi===0)return;qi--;const s=QUESTIONS[qi].a[answers[qi]].s;for(const k in s)scores[k]-=s[k];renderQ();};
+addEventListener("keydown",e=>{
+  if(!$("s-quiz").classList.contains("hidden")&&/^[1-5]$/.test(e.key)){
+    const n=+e.key-1;if(n<QUESTIONS[qi].a.length)pick(n);
+  }
+  if(e.key==="l"||e.key==="L")openPanel();
+  if(e.key==="Escape")$("panel").classList.add("hidden");
+});
 
-/* ---------- ช่วงทำนาย + ตรวจจับการโบกมือ ---------- */
-let waiting=false, barTimer=null;
+/* ---------- ช่วงทำนาย ---------- */
 function divine(){
   show("s-wait");waiting=true;
-  $("waveHint").classList.toggle("hidden",!camReady);
-  let p=0;
-  clearInterval(barTimer);
-  barTimer=setInterval(()=>{p=Math.min(100,p+4);$("barFill").style.width=p+"%";
+  $("waveHint").textContent=camOn&&camReady?"โบกมือหน้ากล้องเพื่อเปิดคำทำนาย หรือกดปุ่มด้านล่าง":"กดปุ่มด้านล่างเพื่อเปิดคำทำนาย";
+  let p=0;clearInterval(barTimer);$("barFill").style.width="0%";
+  barTimer=setInterval(()=>{p=Math.min(100,p+5);$("barFill").style.width=p+"%";
     if(p>=100){clearInterval(barTimer);if(waiting)finish();}},110);
 }
 $("reveal").onclick=()=>{if(waiting)finish();};
@@ -339,47 +455,47 @@ $("reveal").onclick=()=>{if(waiting)finish();};
 function finish(){
   waiting=false;clearInterval(barTimer);
   const order=Object.keys(PATHS).sort((a,b)=>scores[b]-scores[a]);
-  const top=order[0], p=PATHS[top], max=scores[top]||1;
+  const p=PATHS[order[0]], max=scores[order[0]]||1;
+  $("rAvatarUse").setAttribute("href","#"+p.icon);
   $("rTitle").textContent=p.name;
   $("rTagline").textContent=p.tagline;
   $("rWho").textContent=p.who;
   $("rWhy").textContent=p.why;
   $("rJobs").innerHTML=p.jobs.map(j=>`<span class="tag">${j}</span>`).join("");
-  $("rPower").innerHTML="<h3 style='margin-bottom:10px'>พลังที่แม่หมออ่านได้</h3>"+
-    order.slice(0,3).map(k=>`<div><span>${PATHS[k].name.replace(/^(นัก|ผู้)/,"")}</span><i style="--w:${Math.round(scores[k]/max*100)}%"></i></div>`).join("");
+  $("rPower").innerHTML=order.slice(0,3).map(k=>
+    `<div><span>${PATHS[k].name}</span><i style="--w:${Math.round(scores[k]/max*100)}%"></i></div>`).join("");
   show("s-result");
   saveLog(p.name);
 }
 
-/* ---------- Log ไม่ระบุตัวตน ---------- */
+/* ---------- บันทึกแบบไม่ระบุตัวตน ---------- */
 const two=n=>String(n).padStart(2,"0");
-function today(){const d=new Date();return d.getFullYear()+"-"+two(d.getMonth()+1)+"-"+two(d.getDate());}
-function readLog(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}}
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+two(d.getMonth()+1)+"-"+two(d.getDate());};
+const readLog=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}};
 function saveLog(result){
-  const log=readLog(), d=new Date(), date=today();
+  const log=readLog(),d=new Date(),date=today();
   const n=log.filter(r=>r.date===date).length+1;
-  log.push({sid:"S-"+date.replace(/-/g,"")+"-"+two(n),date:date,
+  log.push({sid:"S-"+date.replace(/-/g,"")+"-"+two(n),date,
     time:two(d.getHours())+":"+two(d.getMinutes())+":"+two(d.getSeconds()),
-    result:result, sec:Math.round((Date.now()-startedAt)/1000)});
+    result,sec:Math.round((Date.now()-startedAt)/1000)});
   try{localStorage.setItem(KEY,JSON.stringify(log))}catch(e){}
 }
 function openPanel(){
-  const log=readLog(), date=today();
+  const log=readLog(),date=today();
   $("cToday").textContent=log.filter(r=>r.date===date).length;
   $("cAll").textContent=log.length;
   $("cDays").textContent=new Set(log.map(r=>r.date)).size;
   const c={};log.forEach(r=>c[r.result]=(c[r.result]||0)+1);
   const top=Object.keys(c).sort((a,b)=>c[b]-c[a])[0];
-  $("cTop").textContent=top?top:"—";
-  $("cTop").style.fontSize="18px";
+  $("cTop").textContent=top||"—";
   $("logRows").innerHTML=log.slice().reverse().map(r=>
-    `<tr><td>${r.date}</td><td>${r.time}</td><td>${r.sid}</td><td>${r.result}</td><td>${r.sec} วิ</td></tr>`).join("")
-    || `<tr><td colspan="5" style="color:#9A88B4">ยังไม่มีผู้เล่นในเครื่องนี้ ให้เพื่อนลองเล่นดูก่อน</td></tr>`;
+    `<tr><td>${r.date}</td><td>${r.time}</td><td>${r.sid}</td><td>${r.result}</td><td>${r.sec} วินาที</td></tr>`).join("")
+    || `<tr><td colspan="5">ยังไม่มีผู้เล่นในเครื่องนี้ ให้เพื่อนลองเล่นดูก่อน</td></tr>`;
   $("panel").classList.remove("hidden");
+  $("closePanel").focus({preventScroll:true});
 }
 $("logBtn").onclick=openPanel;
 $("closePanel").onclick=()=>$("panel").classList.add("hidden");
-addEventListener("keydown",e=>{if(e.key==="l"||e.key==="L")openPanel();if(e.key==="Escape")$("panel").classList.add("hidden");});
 $("csv").onclick=()=>{
   const rows=[["session_id","date","time","result","duration_sec"],
     ...readLog().map(r=>[r.sid,r.date,r.time,r.result,r.sec])];
@@ -391,63 +507,82 @@ $("csv").onclick=()=>{
 $("clear").onclick=()=>{if(confirm("ล้างบันทึกผู้เข้าร่วมทั้งหมดในเครื่องนี้?")){localStorage.removeItem(KEY);openPanel();}};
 
 /* ---------- ปุ่มหลัก ---------- */
-$("go").onclick=()=>{resetScores();qi=0;startedAt=Date.now();show("s-quiz");renderQ();};
-$("again").onclick=()=>{show("s-intro");};
-$("share").onclick=()=>{
+function start(){resetScores();qi=0;startedAt=Date.now();show("s-quiz");renderQ();
+  $("choices").querySelector("button").focus({preventScroll:true});}
+$("go").onclick=start;
+$("again").onclick=()=>show("s-intro");
+$("tRestart").onclick=()=>{waiting=false;clearInterval(barTimer);show("s-intro");};
+$("showAll").onclick=()=>{
   $("allList").innerHTML=Object.values(PATHS).map(p=>
-    `<h3>${p.name}</h3><p>${p.tagline} — ${p.jobs.join(" · ")}</p>`).join("");
+    `<div class="all-item"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#${p.icon}"/></svg>
+     <div><b>${p.name}</b><span class="small">${p.jobs.join(" · ")}</span></div></div>`).join("");
   show("s-all");
 };
 $("closeAll").onclick=()=>show("s-result");
 
-/* ---------- Webcam ในลูกแก้ว + ตรวจจับการเคลื่อนไหว ---------- */
-let camReady=false;
-const video=$("cam"), mc=$("motion"), mctx=mc.getContext("2d",{willReadFrequently:true});
-let prev=null, hits=0;
-(async function initCam(){
+/* ---------- ปุ่มช่วยการเข้าถึง ---------- */
+$("tSize").onclick=e=>{
+  const big=document.body.dataset.size==="lg";
+  document.body.dataset.size=big?"normal":"lg";
+  e.target.textContent=big?"ตัวอักษรใหญ่ขึ้น":"ตัวอักษรปกติ";
+};
+$("tTheme").onclick=e=>{
+  const light=document.body.dataset.theme==="light";
+  document.body.dataset.theme=light?"dark":"light";
+  e.target.textContent=light?"โหมดพื้นสว่าง":"โหมดพื้นเข้ม";
+};
+
+/* ---------- กล้องในลูกแก้ว + ตรวจจับการโบกมือ ---------- */
+let camReady=false, camOn=true, stream=null, prev=null, hits=0;
+const video=$("cam"), mctx=$("motion").getContext("2d",{willReadFrequently:true});
+async function openCam(){
   try{
-    const stream=await navigator.mediaDevices.getUserMedia({video:{width:320,height:240},audio:false});
-    video.srcObject=stream;camReady=true;
-    $("camHint").textContent="โบกมือหน้ากล้องได้เลย";
-    setTimeout(()=>$("camHint").style.opacity=".0",2600);
-    requestAnimationFrame(loopMotion);
+    stream=await navigator.mediaDevices.getUserMedia({video:{width:320,height:240},audio:false});
+    video.srcObject=stream;camReady=true;camOn=true;
+    $("camMsg").textContent="ลูกแก้วเปิดกล้องแล้ว โบกมือหน้ากล้องเพื่อเล่นได้";
+    $("tCam").textContent="ปิดกล้อง";
   }catch(e){
-    camReady=false;
-    $("camHint").textContent="ไม่มีกล้อง — กดปุ่มเล่นได้ตามปกติ";
-    video.style.display="none";
+    camReady=false;$("tCam").textContent="เปิดกล้อง";
+    $("camMsg").textContent="ยังไม่ได้ใช้กล้อง — กดปุ่มเล่นได้ตามปกติ";
   }
-})();
-function loopMotion(){
-  if(camReady&&video.videoWidth){
+}
+function closeCam(){
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  stream=null;camReady=false;camOn=false;prev=null;
+  video.style.visibility="hidden";
+  $("camMsg").textContent="ปิดกล้องอยู่ — เล่นด้วยการกดปุ่มได้ปกติ";
+  $("tCam").textContent="เปิดกล้อง";
+}
+$("tCam").onclick=()=>{if(camOn&&stream){closeCam();}else{video.style.visibility="visible";openCam();}};
+openCam();
+(function loopMotion(){
+  if(camOn&&camReady&&video.videoWidth){
     mctx.drawImage(video,0,0,64,48);
     const cur=mctx.getImageData(0,0,64,48).data;
     if(prev){
-      let diff=0;
-      for(let i=0;i<cur.length;i+=16){diff+=Math.abs(cur[i]-prev[i]);}
-      const moved=diff/(cur.length/16);
-      if(moved>26){hits++;}else{hits=Math.max(0,hits-1);}
-      if(hits>4){
-        hits=0;
-        if(waiting){finish();}
-        else if(!$("s-intro").classList.contains("hidden")){$("go").click();}
+      let diff=0;for(let i=0;i<cur.length;i+=16)diff+=Math.abs(cur[i]-prev[i]);
+      if(diff/(cur.length/16)>26)hits++;else hits=Math.max(0,hits-1);
+      if(hits>4){hits=0;
+        if(waiting)finish();
+        else if(!$("s-intro").classList.contains("hidden"))start();
       }
     }
     prev=cur;
   }
   requestAnimationFrame(loopMotion);
-}
+})();
 
-/* ---------- ดาวพร่างพราวเป็นฉากหลัง ---------- */
+/* ---------- ดาวเป็นฉากหลัง ---------- */
 const cv=$("stars"),cx=cv.getContext("2d");let dots=[];
 function sizeStars(){cv.width=innerWidth;cv.height=innerHeight;
-  dots=Array.from({length:Math.min(110,Math.round(innerWidth/13))},()=>({
-    x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.5+.3,
-    s:Math.random()*.25+.05,o:Math.random()}));}
+  dots=Array.from({length:Math.min(90,Math.round(innerWidth/16))},()=>({
+    x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.4+.3,
+    s:Math.random()*.22+.04,o:Math.random()}));}
 sizeStars();addEventListener("resize",sizeStars);
 (function twinkle(){
   cx.clearRect(0,0,cv.width,cv.height);
-  dots.forEach(d=>{d.y-=d.s;if(d.y<0)d.y=cv.height;d.o+=(Math.random()-.5)*.08;d.o=Math.max(.15,Math.min(1,d.o));
-    cx.fillStyle="rgba(240,200,106,"+d.o*.75+")";cx.beginPath();cx.arc(d.x,d.y,d.r,0,7);cx.fill();});
+  dots.forEach(d=>{d.y-=d.s;if(d.y<0)d.y=cv.height;d.o=Math.max(.15,Math.min(1,d.o+(Math.random()-.5)*.08));
+    cx.fillStyle="rgba(255,214,132,"+d.o*.7+")";cx.beginPath();cx.arc(d.x,d.y,d.r,0,7);cx.fill();});
   requestAnimationFrame(twinkle);
 })();
 </script>
