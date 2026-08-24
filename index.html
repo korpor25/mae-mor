@@ -113,11 +113,16 @@ body[data-size="lg"] .choice{min-height:112px}
 .zone .zfill{position:absolute;bottom:0;left:0;right:0;height:0;background:rgba(255,214,132,.6)}
 .zone .znum{position:relative;font-family:var(--font-display);font-size:30px;font-weight:700;color:#fff;
   text-shadow:0 2px 8px #000,0 0 3px #000}
-.zone.hot{box-shadow:inset 0 0 0 3px var(--gold)}
+.zone.hot{box-shadow:inset 0 0 0 4px var(--gold);background:rgba(255,214,132,.16)}
+.zone .zfill{transition:height .08s linear}
 .camoff{position:absolute;inset:0;display:grid;place-items:center;background:rgba(20,8,35,.85);
   color:var(--text);font-size:.9em;padding:12px;text-align:center}
 .choice.hot{border-color:var(--gold);background:var(--card-hover)}
-.camnote{font-size:.8em;color:var(--text-2);margin:8px 0 0}
+.camnote{font-size:.8em;color:var(--text-2);margin:8px 0 0;min-height:1.4em}
+.camctl{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.camctl label{font-size:.8em;color:var(--text-2)}
+.camctl input[type=range]{width:170px;accent-color:var(--gold)}
+.camctl .tool{font-size:14px;padding:8px 14px;min-height:40px}
 
 /* กำลังทำนาย */
 .bar{width:min(340px,82vw);height:10px;border-radius:99px;background:var(--card);border:1px solid var(--gold-line);
@@ -268,11 +273,17 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
       <div class="track" id="track" aria-hidden="true"></div>
     </div>
     <h2 class="q" id="qtext"></h2>
-    <p class="small" style="margin-top:10px">ยกมือค้างไว้เหนือหมายเลขที่เลือกในกรอบกล้อง หรือกดปุ่มด้านล่างก็ได้</p>
+    <p class="small" style="margin-top:10px">ยืนนิ่ง ๆ ให้กล้องจำพื้นหลังสักครู่ แล้ว<b>ยกมือขึ้นเหนือหมายเลขที่เลือก</b> ค้างไว้ราวครึ่งวินาที หรือกดปุ่มด้านล่างก็ได้</p>
     <div class="camwrap">
       <video id="cam2" autoplay muted playsinline aria-hidden="true"></video>
       <div class="zones" id="zones" aria-hidden="true"></div>
       <div class="camoff hidden" id="camoff">ตอนนี้ยังไม่ได้ใช้กล้อง — เลือกคำตอบด้วยการกดปุ่มด้านล่างได้เลย</div>
+    </div>
+    <p class="camnote" id="zhint">ยกมือขึ้นเหนือหมายเลขที่เลือก</p>
+    <div class="camctl" id="camctl">
+      <label for="sens">ความไวกล้อง</label>
+      <input id="sens" type="range" min="1" max="5" step="1" value="3">
+      <button class="tool" id="recal" type="button">จำพื้นหลังใหม่</button>
     </div>
     <p class="camnote">กล้องใช้ตรวจจับการเคลื่อนไหวเท่านั้น ไม่บันทึกภาพ · กดตัวเลข 1–5 บนคีย์บอร์ดก็ได้</p>
     <div class="choices" id="choices" role="group" aria-labelledby="qtext"></div>
@@ -425,6 +436,7 @@ let qi=0, scores={}, answers=[], startedAt=0, waiting=false, barTimer=null;
 const $=id=>document.getElementById(id);
 function show(id){
   STAGES.forEach(s=>$(s).classList.toggle("hidden",s!==id));
+  if(typeof resetVision==="function")resetVision();  // สลับกล้องต้นทาง จึงต้องจำพื้นหลังใหม่
   window.scrollTo(0,0);
   const f=$(id).querySelector("button");if(f)f.focus({preventScroll:true});
 }
@@ -566,17 +578,29 @@ $("tTheme").onclick=e=>{
 };
 
 /* ---------- กล้องในลูกแก้ว + ตรวจจับการโบกมือ ---------- */
-const W=64,H=48;                       // ขนาดภาพที่ใช้วิเคราะห์ (เล็กเพื่อให้ลื่นบนโน้ตบุ๊ก)
-const HOLD=26;                         // ต้องยกมือค้างกี่เฟรมจึงนับว่าเลือก (~0.45 วินาที)
-const MOVE=16;                         // ระดับการเคลื่อนไหวขั้นต่ำของโซน
-let camReady=false, camOn=true, stream=null, prev=null, hits=0, dwell=[], lockUntil=0;
+const W=64,H=48;                       // ขนาดภาพที่ใช้วิเคราะห์
+const HOLD=18;                         // ยกมือค้างกี่เฟรมจึงนับว่าเลือก (~0.3 วินาที)
+const A_BG=0.020;                      // ความเร็วปรับพื้นหลังของจุดที่ว่าง (ตามแสงที่เปลี่ยน)
+const A_FG=0.0020;                     // จุดที่เห็นเป็นวัตถุ ปรับช้ากว่ามาก เพื่อให้ "มือที่ยกค้าง" ไม่จมหายไป
+const AGE=180;                         // ของที่นิ่งอยู่กับที่เกิน 3 วินาที ให้ถือเป็นพื้นหลัง (เช่น ตัวคนที่ยืนรอ)
+const CAP=0.12;                        // ถ้าภาพเปลี่ยนเกินนี้ แปลว่ามีคนเดินเข้าออก ให้หยุดตรวจชั่วคราว
+const SETTLE=40;                       // หลังภาพนิ่งแล้ว รออีกกี่เฟรมจึงเริ่มตรวจใหม่
+let SENS=3;                            // ระดับความไว 1–5 ปรับได้จากแถบใต้กล้อง
+let camReady=false, camOn=true, stream=null, prev=null, bg=null, age=null;
+let hits=0, dwell=[], lockUntil=0, warmup=0, settle=0, busy=false;
 const video=$("cam"), video2=$("cam2"), mctx=$("motion").getContext("2d",{willReadFrequently:true});
+
+// เลือกวิดีโอที่กำลังแสดงผลอยู่จริง — วิดีโอที่ถูกซ่อน (display:none) จะไม่ส่งภาพใหม่ให้วิเคราะห์
+function activeVideo(){
+  return $("s-quiz").classList.contains("hidden") ? video : video2;
+}
+function resetVision(){prev=null;bg=null;age=null;warmup=0;settle=0;dwell=dwell.map(()=>0);}
 
 async function openCam(){
   try{
     stream=await navigator.mediaDevices.getUserMedia({video:{width:320,height:240},audio:false});
     video.srcObject=stream;video2.srcObject=stream;
-    camReady=true;camOn=true;video.style.visibility="visible";
+    camReady=true;camOn=true;video.style.visibility="visible";resetVision();
     $("camMsg").textContent="กล้องพร้อมแล้ว โบกมือหน้ากล้องเพื่อเริ่มเล่นได้เลย";
     $("tCam").textContent="ปิดกล้อง";
   }catch(e){
@@ -587,67 +611,99 @@ async function openCam(){
 }
 function closeCam(){
   if(stream)stream.getTracks().forEach(t=>t.stop());
-  stream=null;camReady=false;camOn=false;prev=null;dwell=dwell.map(()=>0);
+  stream=null;camReady=false;camOn=false;resetVision();
   video.style.visibility="hidden";
   $("camMsg").textContent="ปิดกล้องอยู่ — เล่นด้วยการกดปุ่มได้ตามปกติ";
   $("tCam").textContent="เปิดกล้อง";
   updateCamOverlay();
 }
 $("tCam").onclick=()=>{camOn&&stream?closeCam():openCam();};
+$("sens").oninput=e=>{SENS=+e.target.value;resetVision();};
+$("recal").onclick=()=>{resetVision();$("zhint").textContent="กำลังจำพื้นหลังใหม่ ยืนนิ่ง ๆ สักครู่…";};
 openCam();
 
-function paintZones(best){
+function paintZones(best,on){
   const cells=$("zones").children;
   for(let i=0;i<cells.length;i++){
     const pct=Math.min(100,Math.round(dwell[i]/HOLD*100));
     cells[i].querySelector(".zfill").style.height=pct+"%";
-    cells[i].classList.toggle("hot",i===best&&pct>10);
+    cells[i].classList.toggle("hot",i===best&&on);
     const c=$("choices").children[i];
-    if(c)c.classList.toggle("hot",i===best&&pct>25);
+    if(c)c.classList.toggle("hot",i===best&&pct>30);
   }
 }
 
 (function loopMotion(){
-  if(camOn&&camReady&&video.videoWidth){
-    mctx.drawImage(video,0,0,W,H);
-    const cur=mctx.getImageData(0,0,W,H).data;
-    if(prev){
-      const onQuiz=!$("s-quiz").classList.contains("hidden");
-      const n=onQuiz?QUESTIONS[qi].a.length:1;
-      const sum=new Array(n).fill(0), cnt=new Array(n).fill(0);
-      for(let y=0;y<H;y+=2){
-        for(let x=0;x<W;x+=2){
-          const p=(y*W+x)*4;
-          // ภาพที่แสดงถูกกลับซ้าย-ขวา จึงกลับคอลัมน์ให้ตรงกับที่ผู้เล่นเห็น
-          const z=Math.min(n-1,Math.floor((W-1-x)/(W/n)));
-          sum[z]+=Math.abs(cur[p]-prev[p]);cnt[z]++;
-        }
-      }
-      const avg=sum.map((s,i)=>s/cnt[i]);
-      let best=0;for(let i=1;i<n;i++)if(avg[i]>avg[best])best=i;
-      const second=Math.max(...avg.filter((_,i)=>i!==best),0);
+  const v=activeVideo();
+  if(camOn&&camReady&&v.videoWidth&&v.readyState>=2){
+    mctx.drawImage(v,0,0,W,H);
+    const d=mctx.getImageData(0,0,W,H).data;
+    const cur=new Float32Array(W*H);
+    for(let i=0,p=0;i<cur.length;i++,p+=4)cur[i]=(d[p]+d[p+1]+d[p+2])/3;
 
-      if(onQuiz){
-        if(Date.now()>lockUntil && avg[best]>MOVE && avg[best]>second*1.5){
-          dwell[best]=Math.min(HOLD,dwell[best]+1);
-          for(let i=0;i<n;i++)if(i!==best)dwell[i]=Math.max(0,dwell[i]-2);
-        }else{
-          for(let i=0;i<n;i++)dwell[i]=Math.max(0,dwell[i]-1);
-        }
-        paintZones(best);
-        if(dwell[best]>=HOLD && Date.now()>lockUntil){
-          lockUntil=Date.now()+900;dwell=dwell.map(()=>0);paintZones(-1);
-          pick(best);
-        }
-      }else{
-        // นอกหน้าคำถาม ใช้การโบกมือทั้งจอเป็นตัวสั่งงาน
-        if(avg[0]>24)hits++;else hits=Math.max(0,hits-1);
-        if(hits>5 && Date.now()>lockUntil){
-          hits=0;lockUntil=Date.now()+1200;
-          if(waiting)finish();
-          else if(!$("s-intro").classList.contains("hidden"))start();
-        }
+    if(!bg){bg=cur.slice();age=new Uint16Array(cur.length);prev=cur;warmup=0;
+      requestAnimationFrame(loopMotion);return;}
+    warmup++;
+
+    const onQuiz=!$("s-quiz").classList.contains("hidden");
+    const n=onQuiz?QUESTIONS[qi].a.length:1;
+    const TH=[0,40,32,26,21,17][SENS];        // ต่างจากพื้นหลังเท่าไรจึงถือว่ามีของมาบัง
+    const NEED=[0,.20,.16,.12,.09,.07][SENS]; // ต้องบังพื้นที่ในช่องกี่ส่วนจึงนับว่าเลือก
+    const fgMask=new Uint8Array(cur.length);
+    const fg=new Array(n).fill(0), tot=new Array(n).fill(0);
+    let all=0, move=0;
+
+    for(let y=0;y<H;y++){
+      for(let x=0;x<W;x++){
+        const i=y*W+x;
+        // ภาพที่ผู้เล่นเห็นถูกกลับซ้าย-ขวา จึงกลับคอลัมน์ให้ตรงกับที่เห็นบนจอ
+        const z=Math.min(n-1,Math.floor((W-1-x)/(W/n)));
+        if(Math.abs(cur[i]-bg[i])>TH){fg[z]++;fgMask[i]=1;all++;}
+        tot[z]++;
+        move+=Math.abs(cur[i]-prev[i]);
       }
+    }
+    move/=cur.length;
+    busy=all/cur.length>CAP;                  // มีคนเดินเข้าออกหรือภาพเปลี่ยนทั้งจอ
+    settle=busy?SETTLE:Math.max(0,settle-1);
+    const ratio=fg.map((f,i)=>f/tot[i]);
+    let best=0;for(let i=1;i<n;i++)if(ratio[i]>ratio[best])best=i;
+    const second=n>1?Math.max(...ratio.filter((_,i)=>i!==best)):0;
+    const ready=warmup>25&&!busy&&settle===0;
+
+    if(onQuiz){
+      const strong=ready&&ratio[best]>NEED&&ratio[best]>second*1.35;
+      if(strong&&Date.now()>lockUntil){
+        dwell[best]=Math.min(HOLD,dwell[best]+1);
+        for(let i=0;i<n;i++)if(i!==best)dwell[i]=Math.max(0,dwell[i]-2);
+      }else{
+        for(let i=0;i<n;i++)dwell[i]=Math.max(0,dwell[i]-1);
+      }
+      paintZones(strong?best:-1,strong);
+      $("zhint").textContent = !ready ? "กำลังจำพื้นหลัง ยืนนิ่ง ๆ สักครู่…"
+        : strong ? "เห็นมือที่ช่อง "+(best+1)+" แล้ว ค้างไว้อีกนิด"
+        : "ยกมือขึ้นเหนือหมายเลขที่เลือก";
+      if(dwell[best]>=HOLD&&Date.now()>lockUntil){
+        lockUntil=Date.now()+1000;dwell=dwell.map(()=>0);paintZones(-1,false);
+        pick(best);
+        resetVision();                        // ขึ้นข้อใหม่ ให้จำพื้นหลังใหม่ทุกครั้ง
+        requestAnimationFrame(loopMotion);return;
+      }
+    }else{
+      // นอกหน้าคำถาม ใช้การโบกมือทั้งจอเป็นตัวสั่งงาน
+      if(move>10||(ready&&ratio[0]>.12))hits++;else hits=Math.max(0,hits-1);
+      if(hits>8&&Date.now()>lockUntil){
+        hits=0;lockUntil=Date.now()+1200;
+        if(waiting)finish();
+        else if(!$("s-intro").classList.contains("hidden"))start();
+      }
+    }
+
+    // ปรับภาพพื้นหลัง: จุดว่างปรับเร็วตามแสง จุดที่เห็นเป็นวัตถุปรับช้า
+    // ส่วนของที่อยู่นิ่งเกิน 3 วินาที (เช่น ตัวคนที่ยืนรอ) ให้กลืนเป็นพื้นหลัง เหลือแต่มือที่เพิ่งยกขึ้น
+    for(let i=0;i<cur.length;i++){
+      if(fgMask[i]&&!busy)age[i]++;else age[i]=0;
+      bg[i]+=(cur[i]-bg[i])*((fgMask[i]&&!busy&&age[i]<AGE)?A_FG:A_BG);
     }
     prev=cur;
   }
