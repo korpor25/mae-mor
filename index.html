@@ -170,9 +170,10 @@ h1 span{color:var(--gold)}
 #s-quiz{display:flex;flex-direction:column}
 #s-quiz .progress{order:1}
 #s-quiz .q{order:2}
-#s-quiz .choices{order:3}
-#s-quiz .campanel{order:4}
-#s-quiz .row{order:5}
+#s-quiz .qdiv{order:3}
+#s-quiz .choices{order:4}
+#s-quiz .campanel{order:5}
+#s-quiz .row{order:6}
 
 .progress{width:100%;max-width:420px;margin:0 auto 14px}
 .progress p{font-family:var(--font-display);font-size:.86em;color:var(--gold);margin-bottom:8px}
@@ -181,11 +182,26 @@ h1 span{color:var(--gold)}
   background:var(--card);border:1px solid var(--gold-line)}
 .progress b.on{background:var(--gold);border-color:var(--gold)}
 
-.q{font-family:var(--font-display);font-size:clamp(21px,5.2vw,30px);line-height:1.42;
-  max-width:min(100%,28ch);margin:0 auto}
+/* โจทย์แบ่งสองชั้น — บรรทัดบนบอก "สถานการณ์" บรรทัดล่างคือ "สิ่งที่ถาม"
+   ตาจะจับบรรทัดใหญ่ก่อนแล้วค่อยย้อนอ่านฉาก ไม่ต้องไล่อ่านประโยคยาวทีเดียวจบ */
+.q{font-family:var(--font-display);font-size:clamp(21px,5.2vw,30px);line-height:1.35;
+  max-width:min(100%,26ch);margin:0 auto}
+.q-scene{display:block;font-family:var(--font-body);font-size:max(15px,.6em);font-weight:400;
+  line-height:1.5;color:var(--text-2);margin-bottom:7px}
+/* จุดนำสายตาสีทองหน้าบรรทัดสถานการณ์ บอกจุดเริ่มอ่าน */
+.q-scene::before{content:"";display:inline-block;width:7px;height:7px;margin-right:9px;
+  background:var(--gold);transform:rotate(45deg);vertical-align:middle;position:relative;top:-1px}
+.q-ask{display:block}
+
+/* เส้นคั่นพร้อมป้าย — นำสายตาจากโจทย์ลงสู่ตัวเลือก */
+.qdiv{display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;max-width:var(--maxw);margin:14px auto 0}
+.qdiv i{flex:1;height:1px;max-width:110px;background:linear-gradient(90deg,transparent,var(--gold-line))}
+.qdiv i:last-child{background:linear-gradient(90deg,var(--gold-line),transparent)}
+.qdiv span{font-family:var(--font-display);font-size:.74em;color:var(--gold);white-space:nowrap}
 
 /* ตัวเลือก — ยิ่งกล่องเตี้ยและไอคอนเล็ก ยิ่งเห็นครบทุกข้อในจอเดียว เปรียบเทียบง่ายกว่า */
-.choices{display:grid;gap:9px;width:100%;max-width:var(--maxw);margin:16px auto 0;text-align:left}
+.choices{display:grid;gap:9px;width:100%;max-width:var(--maxw);margin:12px auto 0;text-align:left}
 .choice{
   display:flex;gap:11px;align-items:center;width:100%;
   padding:10px 12px;min-height:62px;border-radius:14px;cursor:pointer;
@@ -435,7 +451,11 @@ body[data-size="lg"] .camctl,body[data-size="lg"] .camnote-fine{font-size:1em}
       <p id="qn">ข้อ 1 จาก 6</p>
       <div class="track" id="track" aria-hidden="true"></div>
     </div>
-    <h2 class="q" id="qtext"></h2>
+    <h2 class="q" id="qtext">
+      <span class="q-scene" id="qscene"></span>
+      <span class="q-ask" id="qask"></span>
+    </h2>
+    <div class="qdiv" aria-hidden="true"><i></i><span>เลือก 1 ข้อ</span><i></i></div>
     <div class="choices" id="choices" role="group" aria-labelledby="qtext"></div>
 
     <div class="campanel">
@@ -563,34 +583,34 @@ const PATHS = {
 
 /* ---------- คำถาม 6 ข้อ ใช้ภาพการ์ตูนประกอบทุกตัวเลือก ---------- */
 const QUESTIONS = [
-  {q:"วันหยุดที่ว่างทั้งวัน คุณอยากทำอะไรที่สุด",a:[
+  {scene:"วันหยุดที่ว่างทั้งวัน",q:"คุณอยากทำอะไรที่สุด",a:[
     {ic:"ic-box",t:"จัดของ จัดตาราง ให้ทุกอย่างเข้าที่",s:{data:2,net:2,sec:1}},
     {ic:"ic-palette",t:"วาดรูป ตัดต่อคลิป หรือแต่งห้องใหม่",s:{ux:3,game:1}},
     {ic:"ic-gamepad",t:"เล่นเกม แล้วคิดว่าถ้าเป็นเกมของเราจะทำต่างออกไป",s:{game:3,dev:1}},
     {ic:"ic-wrench",t:"แกะของเล่นหรือเครื่องใช้ ดูข้างในว่าทำงานอย่างไร",s:{dev:2,sec:2,net:1}}]},
-  {q:"เพื่อนมาเล่าปัญหาให้ฟัง คุณมักทำอะไรก่อน",a:[
+  {scene:"เพื่อนมาเล่าปัญหาให้ฟัง",q:"คุณมักทำอะไรก่อน",a:[
     {ic:"ic-search",t:"ถามรายละเอียดเยอะ ๆ แล้วสรุปให้ฟังว่าปัญหาจริงคืออะไร",s:{data:3,sec:1}},
     {ic:"ic-hammer",t:"หาวิธีแก้ให้เลย ลงมือช่วยทำด้วย",s:{dev:3,net:1}},
     {ic:"ic-heart",t:"ฟังความรู้สึกเขาก่อน ให้เขารู้สึกดีขึ้น",s:{ux:3}},
     {ic:"ic-shield",t:"เตือนว่าอย่าเชื่อใครง่าย ๆ เดี๋ยวโดนหลอกอีก",s:{sec:3}}]},
-  {q:"ถ้าเสกอะไรก็ได้หนึ่งอย่าง คุณจะเสกอะไร",a:[
+  {scene:"ถ้าเสกอะไรก็ได้หนึ่งอย่าง",q:"คุณจะเสกอะไร",a:[
     {ic:"ic-robot",t:"หุ่นยนต์ที่ทายใจคนได้แม่นมาก",s:{data:3,dev:1}},
     {ic:"ic-phone",t:"แอปที่คนทั้งโรงเรียนต้องใช้",s:{dev:3,ux:1}},
     {ic:"ic-planet",t:"โลกอีกใบที่มีเรื่องราวของตัวเอง",s:{game:3}},
     {ic:"ic-door",t:"ประตูวิเศษที่เชื่อมทุกที่เข้าหากัน",s:{net:3}},
     {ic:"ic-wall",t:"กำแพงที่ไม่มีใครเจาะเข้ามาได้",s:{sec:3}}]},
-  {q:"เจอปัญหาที่ยังไม่รู้วิธีแก้เลย คุณจะทำอย่างไร",a:[
+  {scene:"เจอปัญหาที่ยังไม่รู้วิธีแก้เลย",q:"คุณจะทำอย่างไร",a:[
     {ic:"ic-flask",t:"ลองผิดลองถูกเองไปเรื่อย ๆ จนกว่าจะได้",s:{dev:3,game:1}},
     {ic:"ic-chart",t:"หาข้อมูลก่อน ดูว่าคนอื่นเจอแบบนี้แล้วเป็นอย่างไร",s:{data:3}},
     {ic:"ic-chat",t:"ชวนคนอื่นมาช่วยคิด แบ่งงานกันทำ",s:{net:2,ux:2}},
     {ic:"ic-eye",t:"มองหาช่องที่คนอื่นมองข้ามไป",s:{sec:3}}]},
-  {q:"เวลาทำงานกลุ่ม คุณมักได้บทบาทไหน",a:[
+  {scene:"เวลาทำงานกลุ่ม",q:"คุณมักได้บทบาทไหน",a:[
     {ic:"ic-check",t:"คนตรวจความถูกต้อง คุมตัวเลข",s:{data:3,sec:1}},
     {ic:"ic-wrench",t:"คนลงมือทำชิ้นงานจริง",s:{dev:3,game:1}},
     {ic:"ic-frame",t:"คนทำสไลด์และออกแบบให้สวย",s:{ux:3}},
     {ic:"ic-mega",t:"คนประสานงาน คุยกับทุกฝ่าย จัดคิวงาน",s:{net:3}},
     {ic:"ic-bulb",t:"คนคิดไอเดียสนุก ๆ ให้ทีม",s:{game:3,ux:1}}]},
-  {q:"คำชมแบบไหนที่ทำให้คุณยิ้มที่สุด",a:[
+  {scene:"มีคนเอ่ยปากชมคุณ",q:"คำชมแบบไหนทำให้คุณยิ้มที่สุด",a:[
     {ic:"ic-brain",t:"คิดได้อย่างไรเนี่ย ฉลาดมาก",s:{data:2,dev:2}},
     {ic:"ic-star",t:"สวยจัง น่าใช้จัง",s:{ux:3}},
     {ic:"ic-smile",t:"สนุกมาก เล่นเพลินเลย",s:{game:3}},
@@ -615,7 +635,8 @@ function resetScores(){scores={};Object.keys(PATHS).forEach(k=>scores[k]=0);answ
 function renderQ(){
   $("qn").textContent="ข้อ "+(qi+1)+" จาก "+QUESTIONS.length;
   $("track").innerHTML=QUESTIONS.map((_,i)=>`<b class="${i<=qi?'on':''}"></b>`).join("");
-  $("qtext").textContent=QUESTIONS[qi].q;
+  $("qscene").textContent=QUESTIONS[qi].scene;
+  $("qask").textContent=QUESTIONS[qi].q;
   const box=$("choices");box.innerHTML="";
   QUESTIONS[qi].a.forEach((opt,i)=>{
     const b=document.createElement("button");
