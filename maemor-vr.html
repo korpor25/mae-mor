@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แม่หมอ VR — ทำนายสายอาชีพในอนาคต</title>
+<style>
+:root{
+  --ink:#12071F;
+  --plum:#1E0B33;
+  --plum-2:#2E1250;
+  --gold:#F0C86A;
+  --gold-dim:#9A7C3C;
+  --jade:#43D9C0;
+  --rose:#FF7EB6;
+  --paper:#F6EEDC;
+  --font-display:"Leelawadee UI","Noto Sans Thai","Sarabun",Tahoma,sans-serif;
+  --font-body:"Sarabun","Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:radial-gradient(120% 90% at 50% 0%,#3A1A5E 0%,var(--plum) 45%,var(--ink) 100%);
+  color:var(--paper);font-family:var(--font-body);overflow:hidden;
+}
+#stars{position:fixed;inset:0;z-index:0}
+.wrap{position:relative;z-index:1;height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+.stage{width:min(880px,100%);max-height:100%;overflow:auto;text-align:center;animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.hidden{display:none !important}
+
+/* ลายไทยคั่นบรรทัด */
+.rule{display:flex;align-items:center;justify-content:center;gap:10px;margin:18px 0}
+.rule i{display:block;width:78px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim))}
+.rule i+i{background:linear-gradient(90deg,var(--gold-dim),transparent)}
+.rule b{width:9px;height:9px;background:var(--gold);transform:rotate(45deg);box-shadow:0 0 12px rgba(240,200,106,.7)}
+
+.eyebrow{font-family:var(--font-display);letter-spacing:.42em;font-size:12px;color:var(--gold);text-transform:uppercase;margin:0 0 6px}
+h1{font-family:var(--font-display);font-weight:700;font-size:clamp(30px,6vw,54px);line-height:1.15;margin:0;letter-spacing:.02em}
+h1 span{color:var(--gold)}
+.lead{font-size:clamp(15px,2.2vw,18px);color:#D8C8E8;max-width:44ch;margin:14px auto 0;line-height:1.7}
+
+/* ลูกแก้ว = signature */
+.orb-holder{position:relative;width:min(300px,72vw);aspect-ratio:1;margin:8px auto 0}
+.orb{position:absolute;inset:0;border-radius:50%;overflow:hidden;
+  background:radial-gradient(circle at 34% 28%,#6E3EA8,#2B1049 60%,#160828);
+  box-shadow:0 0 0 2px rgba(240,200,106,.55),0 0 60px rgba(122,60,190,.55),inset 0 0 60px rgba(0,0,0,.6);
+  animation:float 6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+#cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);
+  filter:saturate(.5) contrast(1.1) hue-rotate(255deg) brightness(.9);opacity:.55;mix-blend-mode:screen}
+.orb-glass{position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.5),rgba(255,255,255,0) 42%),
+             radial-gradient(circle at 70% 80%,rgba(255,126,182,.28),transparent 55%)}
+.orb-base{position:absolute;left:50%;bottom:-16px;transform:translateX(-50%);width:56%;height:26px;
+  border-radius:6px 6px 14px 14px;background:linear-gradient(180deg,var(--gold),#7A5A22);opacity:.9}
+.orb-cta{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);font-size:13px;color:var(--gold);
+  letter-spacing:.08em;text-shadow:0 2px 8px #000}
+
+/* ปุ่ม */
+.btn{font-family:var(--font-display);font-size:17px;font-weight:700;letter-spacing:.06em;
+  padding:15px 34px;border-radius:999px;border:1px solid var(--gold);cursor:pointer;
+  background:linear-gradient(180deg,#FBE0A2,var(--gold));color:#2A1206;
+  box-shadow:0 8px 26px rgba(240,200,106,.28);transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(240,200,106,.4)}
+.btn.ghost{background:transparent;color:var(--gold);box-shadow:none}
+.btn.small{font-size:14px;padding:10px 20px}
+.btn:focus-visible,.choice:focus-visible{outline:3px solid var(--jade);outline-offset:3px}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+
+/* คำถาม */
+.track{display:flex;gap:7px;justify-content:center;margin-bottom:22px}
+.track b{width:26px;height:3px;border-radius:2px;background:rgba(240,200,106,.22)}
+.track b.on{background:var(--gold)}
+.q{font-family:var(--font-display);font-size:clamp(21px,3.4vw,30px);line-height:1.45;margin:0 auto 6px;max-width:30ch}
+.qn{font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:10px}
+.choices{display:grid;gap:12px;max-width:620px;margin:22px auto 0;text-align:left}
+.choice{display:flex;gap:14px;align-items:center;padding:16px 18px;border-radius:16px;cursor:pointer;
+  background:rgba(255,255,255,.05);border:1px solid rgba(240,200,106,.22);color:var(--paper);
+  font-family:var(--font-body);font-size:16.5px;line-height:1.5;text-align:left;transition:.15s}
+.choice:hover{background:rgba(240,200,106,.12);border-color:var(--gold);transform:translateX(4px)}
+.choice em{font-style:normal;font-size:21px;filter:saturate(.9)}
+
+/* ทำนาย */
+.smoke{font-size:70px;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.55;transform:scale(.96)}50%{opacity:1;transform:scale(1.06)}}
+.bar{width:min(320px,80vw);height:4px;border-radius:4px;background:rgba(255,255,255,.14);margin:22px auto 0;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--jade),var(--gold))}
+
+/* ผล */
+.badge{font-family:var(--font-display);font-size:12px;letter-spacing:.3em;color:var(--ink);
+  background:var(--gold);display:inline-block;padding:6px 14px;border-radius:999px}
+.title{font-family:var(--font-display);font-size:clamp(28px,5.4vw,46px);margin:14px 0 0;color:var(--gold)}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(240,200,106,.2);border-radius:20px;
+  padding:22px 24px;max-width:620px;margin:20px auto 0;text-align:left;line-height:1.8;font-size:16px}
+.card h3{font-family:var(--font-display);font-size:14px;letter-spacing:.2em;color:var(--jade);margin:0 0 8px}
+.card p{margin:0 0 16px}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:13px;padding:6px 12px;border-radius:999px;background:rgba(67,217,192,.14);
+  border:1px solid rgba(67,217,192,.4);color:#BFF5EC}
+.power{margin-top:16px}
+.power div{display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:7px}
+.power span{flex:0 0 118px;color:#D8C8E8}
+.power i{flex:1;height:7px;border-radius:4px;background:rgba(255,255,255,.1);position:relative;overflow:hidden}
+.power i::after{content:"";position:absolute;inset:0;width:var(--w);background:linear-gradient(90deg,var(--rose),var(--gold))}
+
+footer{position:fixed;bottom:12px;left:0;right:0;text-align:center;font-size:11.5px;color:#8C7AA6;z-index:2}
+footer button{background:none;border:0;color:var(--gold-dim);cursor:pointer;font:inherit}
+
+/* แผงบันทึก */
+.panel{position:fixed;inset:0;background:rgba(10,4,20,.94);z-index:5;padding:28px;overflow:auto}
+.panel .inner{max-width:760px;margin:0 auto;text-align:left}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}
+th,td{padding:9px 10px;border-bottom:1px solid rgba(240,200,106,.18);text-align:left}
+th{color:var(--gold);font-weight:600;font-size:12.5px;letter-spacing:.1em}
+.stat{display:flex;gap:26px;flex-wrap:wrap;margin-top:14px}
+.stat div b{display:block;font-family:var(--font-display);font-size:30px;color:var(--gold)}
+.stat div span{font-size:12.5px;color:#B9A8CE}
+.note{font-size:12.5px;color:#9A88B4;margin-top:16px;line-height:1.7}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div class="wrap">
+
+  <!-- หน้าเริ่ม -->
+  <section class="stage" id="s-intro">
+    <p class="eyebrow">IT · มทร.ล้านนา ลำปาง</p>
+    <h1>แม่หมอ <span>VR</span></h1>
+    <div class="rule"><i></i><b></b><i></i></div>
+    <div class="orb-holder">
+      <div class="orb">
+        <video id="cam" autoplay muted playsinline></video>
+        <div class="orb-glass"></div>
+        <p class="orb-cta" id="camHint">กำลังเปิดลูกแก้ว…</p>
+      </div>
+      <div class="orb-base"></div>
+    </div>
+    <p class="lead">ตอบ 7 คำถามสั้น ๆ แล้วแม่หมอจะอ่านพลังความถนัดของเจ้า<br>ว่าอนาคตสายดิจิทัลของเจ้าอยู่ทางไหน</p>
+    <div class="row">
+      <button class="btn" id="go">เปิดคำทำนาย</button>
+    </div>
+    <p class="note" style="text-align:center">ใช้เวลา 3–5 นาที · ไม่เก็บชื่อหรือข้อมูลส่วนตัวใด ๆ</p>
+  </section>
+
+  <!-- คำถาม -->
+  <section class="stage hidden" id="s-quiz">
+    <div class="track" id="track"></div>
+    <p class="qn" id="qn">ข้อ 1</p>
+    <h2 class="q" id="qtext"></h2>
+    <div class="choices" id="choices"></div>
+    <div class="row"><button class="btn ghost small" id="back">ย้อนกลับ</button></div>
+  </section>
+
+  <!-- กำลังทำนาย -->
+  <section class="stage hidden" id="s-wait">
+    <div class="smoke">🔮</div>
+    <h2 class="q" id="waitText">แม่หมอกำลังอ่านพลังความถนัดของเจ้า…</h2>
+    <div class="bar"><i id="barFill"></i></div>
+    <p class="lead" id="waveHint">โบกมือหน้ากล้องเพื่อปลุกลูกแก้ว</p>
+    <div class="row"><button class="btn small" id="reveal">เปิดคำทำนายเลย</button></div>
+  </section>
+
+  <!-- ผลทำนาย -->
+  <section class="stage hidden" id="s-result">
+    <span class="badge">คำทำนายของเจ้า</span>
+    <h2 class="title" id="rTitle"></h2>
+    <p class="lead" id="rTagline"></p>
+    <div class="card">
+      <h3>แม่หมอเห็นอะไรในตัวเจ้า</h3>
+      <p id="rWho"></p>
+      <h3>ทำไมจึงเหมาะกับสายนี้</h3>
+      <p id="rWhy"></p>
+      <h3>สายอาชีพที่รออยู่</h3>
+      <div class="tags" id="rJobs"></div>
+      <div class="power" id="rPower"></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="again">เล่นอีกครั้ง</button>
+      <button class="btn ghost small" id="share">ดูสายอาชีพทั้งหมด</button>
+    </div>
+  </section>
+
+  <!-- สายอาชีพทั้งหมด -->
+  <section class="stage hidden" id="s-all">
+    <h1 style="font-size:28px">สายอาชีพทั้ง 6 ในคำทำนาย</h1>
+    <div class="rule"><i></i><b></b><i></i></div>
+    <div id="allList" class="card" style="max-width:660px"></div>
+    <div class="row"><button class="btn small" id="closeAll">กลับ</button></div>
+  </section>
+</div>
+
+<footer>
+  แม่หมอ VR · เล่นแบบออฟไลน์ได้ · <button id="logBtn">บันทึกผู้เข้าร่วม (L)</button>
+</footer>
+
+<!-- แผงบันทึกผู้เข้าร่วม -->
+<div class="panel hidden" id="panel">
+  <div class="inner">
+    <p class="eyebrow">สำหรับเจ้าหน้าที่บูธ</p>
+    <h1 style="font-size:28px">บันทึกผู้เข้าร่วมกิจกรรม</h1>
+    <div class="stat">
+      <div><b id="cToday">0</b><span>วันนี้</span></div>
+      <div><b id="cAll">0</b><span>ทั้งหมด</span></div>
+      <div><b id="cDays">0</b><span>จำนวนวันที่จัด</span></div>
+      <div><b id="cTop">—</b><span>ผลที่ออกบ่อยสุด</span></div>
+    </div>
+    <div class="row" style="justify-content:flex-start">
+      <button class="btn small" id="csv">ดาวน์โหลด CSV</button>
+      <button class="btn ghost small" id="clear">ล้างข้อมูล</button>
+      <button class="btn ghost small" id="closePanel">ปิด</button>
+    </div>
+    <table><thead><tr><th>วันที่</th><th>เวลา</th><th>รอบ (Session)</th><th>ผลการทำนาย</th><th>ใช้เวลา</th></tr></thead>
+    <tbody id="logRows"></tbody></table>
+    <p class="note">บันทึกเฉพาะวันที่ เวลา หมายเลขรอบที่ระบบสร้างอัตโนมัติ ผลการทำนาย และเวลาที่ใช้เล่น<br>
+    ไม่มีการเก็บชื่อ นามสกุล เบอร์โทร โรงเรียน หรือภาพจากกล้อง · ภาพจากกล้องใช้แสดงในลูกแก้วและตรวจจับการโบกมือเท่านั้น ไม่มีการอัดหรือส่งออกจากเครื่อง</p>
+  </div>
+</div>
+
+<canvas id="motion" width="64" height="48" class="hidden"></canvas>
+
+<script>
+/* ---------- ข้อมูลสายอาชีพ ---------- */
+const PATHS = {
+  data:{name:"นักอ่านอนาคตจากข้อมูล",tagline:"เจ้ามองตัวเลขแล้วเห็นเรื่องราวที่คนอื่นมองไม่เห็น",
+    who:"เจ้าเป็นคนช่างสังเกต ชอบหาความจริงจากข้อมูลมากกว่าเดา เวลาเจอปัญหาเจ้าจะถามหาสาเหตุก่อนลงมือทำ และรู้สึกสนุกเวลาจับรูปแบบซ้ำ ๆ ในสิ่งที่ดูยุ่งเหยิงได้",
+    why:"งานสาย AI และข้อมูลต้องการคนที่อดทนกับรายละเอียด ตั้งคำถามเก่ง และเชื่อหลักฐานมากกว่าความรู้สึก ซึ่งเป็นนิสัยที่เจ้ามีอยู่แล้ว",
+    jobs:["Data Analyst","AI / Machine Learning","Business Intelligence","นักวิจัยข้อมูล"]},
+  dev:{name:"นักสร้างเครื่องจักรความคิด",tagline:"เจ้าคิดอะไรได้ ก็อยากทำให้มันใช้งานได้จริง",
+    who:"เจ้าเป็นคนลงมือ ชอบแกะดูว่าอะไรทำงานยังไง และไม่กลัวลองผิดลองถูกจนกว่าจะสำเร็จ ความสุขของเจ้าคือเห็นสิ่งที่ตัวเองสร้างทำงานได้",
+    why:"การเขียนโปรแกรมคือการแก้ปัญหาซ้ำ ๆ จนกว่าจะได้ผล คนที่ไปได้ไกลไม่ใช่คนเก่งที่สุด แต่เป็นคนที่ยังลองต่อ ซึ่งตรงกับเจ้า",
+    jobs:["Software Developer","Web Developer","Mobile Developer","System Analyst"]},
+  ux:{name:"นักสร้างสรรค์ดิจิทัล",tagline:"เจ้าใส่ใจว่าคนอื่นจะรู้สึกอย่างไรกับสิ่งที่เจ้าทำ",
+    who:"เจ้ามองเห็นความสวยงามและความรู้สึกของคน เวลามีใครใช้ของแล้วสับสน เจ้าจะรู้สึกว่ามันน่าจะทำให้ง่ายกว่านี้ได้ และเจ้าชอบทำให้สิ่งของดูดีขึ้น",
+    why:"งาน UX/UI คือการเข้าใจคนก่อนออกแบบหน้าจอ ทักษะสำคัญคือความเห็นอกเห็นใจและสายตาที่ละเอียด ไม่ใช่การเขียนโค้ดเก่ง",
+    jobs:["UX/UI Designer","Digital Media","Content Creator","Product Designer"]},
+  game:{name:"ผู้สร้างโลกใบใหม่",tagline:"ในหัวของเจ้ามีโลกที่ยังไม่มีใครได้เข้าไปเล่น",
+    who:"เจ้าชอบเรื่องเล่า ตัวละคร และความสนุก เวลาเล่นเกมเจ้าไม่ได้แค่เล่น แต่คิดต่อว่าถ้าเป็นเกมของเราจะทำให้ต่างออกไปอย่างไร",
+    why:"การทำเกมต้องรวมศิลปะ ตรรกะ และความเข้าใจคนเล่นเข้าด้วยกัน คนที่ชอบทั้งจินตนาการและการลงมือทำจะเติบโตในสายนี้ได้ดี",
+    jobs:["Game Developer","Game Designer","3D / Animation","AR/VR Developer"]},
+  sec:{name:"ผู้พิทักษ์เงามืด",tagline:"เจ้าเห็นช่องโหว่ที่คนอื่นเดินผ่านไปเฉย ๆ",
+    who:"เจ้าเป็นคนระแวดระวัง ไม่เชื่ออะไรง่าย ๆ และชอบคิดว่าถ้ามีคนตั้งใจโกงระบบนี้ เขาจะทำจากทางไหน เจ้ารู้สึกดีเวลาได้ปกป้องคนอื่น",
+    why:"งานความปลอดภัยไซเบอร์ต้องการคนที่คิดต่างจากคนทั่วไป มองหาจุดอ่อนก่อนคนร้ายจะเจอ และมีวินัยกับกฎเกณฑ์",
+    jobs:["Cybersecurity","Penetration Tester","IT Auditor","Security Operations"]},
+  net:{name:"ผู้เชื่อมสายใยจักรวาล",tagline:"ถ้าไม่มีเจ้า ทุกอย่างจะหยุดเชื่อมต่อกัน",
+    who:"เจ้าเป็นคนที่คนอื่นพึ่งได้ ชอบให้ทุกอย่างเรียบร้อยเป็นระบบ และพอใจเวลาทุกส่วนทำงานประสานกันได้ราบรื่น",
+    why:"ระบบเครือข่ายและคลาวด์คือกระดูกสันหลังของทุกองค์กร ต้องการคนที่ละเอียด รับผิดชอบ และแก้ปัญหาเฉพาะหน้าได้",
+    jobs:["Network Engineer","Cloud / DevOps","System Administrator","IT Support ระดับสูง"]}
+};
+
+/* ---------- คำถาม 7 ข้อ (สถานการณ์ ไม่ต้องมีพื้นความรู้ IT) ---------- */
+const QUESTIONS = [
+  {q:"วันหยุดที่ว่างทั้งวัน เจ้าอยากทำอะไรที่สุด?",a:[
+    {e:"🗂️",t:"จัดของ จัดตาราง ให้ทุกอย่างเข้าที่",s:{data:2,net:2,sec:1}},
+    {e:"🎨",t:"วาดรูป ตัดต่อคลิป หรือแต่งห้องใหม่",s:{ux:3,game:1}},
+    {e:"🎮",t:"เล่นเกม แล้วคิดว่าถ้าเป็นเกมของเราจะทำต่างออกไป",s:{game:3,dev:1}},
+    {e:"🔧",t:"แกะของเล่นหรือเครื่องใช้ ดูข้างในว่าทำงานยังไง",s:{dev:2,sec:2,net:1}}]},
+  {q:"เพื่อนมาเล่าปัญหาให้ฟัง เจ้ามักทำอะไรก่อน?",a:[
+    {e:"🔍",t:"ถามรายละเอียดเยอะ ๆ แล้วสรุปให้ฟังว่าปัญหาจริงคืออะไร",s:{data:3,sec:1}},
+    {e:"🛠️",t:"หาวิธีแก้ให้เลย ลงมือช่วยทำด้วย",s:{dev:3,net:1}},
+    {e:"🤝",t:"ฟังความรู้สึกเขาก่อน ให้เขารู้สึกดีขึ้น",s:{ux:3}},
+    {e:"🛡️",t:"เตือนว่าอย่าเชื่อใครง่าย ๆ เดี๋ยวโดนหลอกอีก",s:{sec:3}}]},
+  {q:"ถ้าเสกอะไรก็ได้หนึ่งอย่าง เจ้าจะเสกอะไร?",a:[
+    {e:"🤖",t:"หุ่นยนต์ที่ทายใจคนได้แม่นมาก",s:{data:3,dev:1}},
+    {e:"📱",t:"แอปที่คนทั้งโรงเรียนต้องใช้",s:{dev:3,ux:1}},
+    {e:"🌌",t:"โลกอีกใบที่มีเรื่องราวของตัวเอง",s:{game:3}},
+    {e:"🚪",t:"ประตูวิเศษที่เชื่อมทุกที่เข้าหากัน",s:{net:3}},
+    {e:"🏯",t:"กำแพงที่ไม่มีใครเจาะเข้ามาได้",s:{sec:3}}]},
+  {q:"เจอปัญหาที่ยังไม่รู้วิธีแก้เลย เจ้าจะ...",a:[
+    {e:"🧪",t:"ลองผิดลองถูกเองไปเรื่อย ๆ จนกว่าจะได้",s:{dev:3,game:1}},
+    {e:"📊",t:"หาข้อมูลก่อน ดูว่าคนอื่นเจอแบบนี้แล้วเป็นยังไง",s:{data:3}},
+    {e:"🗣️",t:"ชวนคนอื่นมาช่วยคิด แบ่งงานกันทำ",s:{net:2,ux:2}},
+    {e:"🕵️",t:"มองหาช่องที่คนอื่นมองข้ามไป",s:{sec:3}}]},
+  {q:"เวลาทำงานกลุ่ม เจ้ามักได้บทบาทไหน?",a:[
+    {e:"✅",t:"คนตรวจความถูกต้อง คุมตัวเลข",s:{data:3,sec:1}},
+    {e:"⚙️",t:"คนลงมือทำชิ้นงานจริง",s:{dev:3,game:1}},
+    {e:"🖼️",t:"คนทำสไลด์และออกแบบให้สวย",s:{ux:3}},
+    {e:"📣",t:"คนประสานงาน คุยกับทุกฝ่าย จัดคิวงาน",s:{net:3}},
+    {e:"💡",t:"คนคิดไอเดียสนุก ๆ ให้ทีม",s:{game:3,ux:1}}]},
+  {q:"คำชมแบบไหนที่ทำให้เจ้ายิ้มที่สุด?",a:[
+    {e:"🧠",t:"คิดได้ไงเนี่ย ฉลาดมาก",s:{data:2,dev:2}},
+    {e:"✨",t:"สวยจัง น่าใช้จัง",s:{ux:3}},
+    {e:"😄",t:"สนุกมาก เล่นเพลินเลย",s:{game:3}},
+    {e:"🔒",t:"อยู่กับเธอแล้วรู้สึกปลอดภัย",s:{sec:3}},
+    {e:"🌐",t:"ขาดเธอไม่ได้เลย ไม่มีเธอทุกอย่างพัง",s:{net:3}}]},
+  {q:"ถ้าได้พลังวิเศษหนึ่งอย่างในวันสอบ เจ้าเลือกอะไร?",a:[
+    {e:"💭",t:"อ่านใจคนได้",s:{ux:2,data:2}},
+    {e:"⏸️",t:"หยุดเวลาเพื่อทำงานให้ทัน",s:{dev:3}},
+    {e:"🪄",t:"เสกสิ่งของขึ้นมาจากอากาศ",s:{game:2,dev:1}},
+    {e:"👻",t:"ล่องหนได้",s:{sec:3}},
+    {e:"⚡",t:"เทเลพอร์ตไปไหนก็ได้",s:{net:3}}]}
+];
+
+/* ---------- สถานะเกม ---------- */
+const KEY="maemorvr_log_v1";
+let qi=0, scores={}, answers=[], startedAt=0;
+const $=id=>document.getElementById(id);
+const show=id=>{["s-intro","s-quiz","s-wait","s-result","s-all"].forEach(s=>$(s).classList.toggle("hidden",s!==id));};
+
+function resetScores(){scores={};Object.keys(PATHS).forEach(k=>scores[k]=0);answers=[];}
+
+function renderQ(){
+  $("track").innerHTML=QUESTIONS.map((_,i)=>`<b class="${i<=qi?'on':''}"></b>`).join("");
+  $("qn").textContent="ข้อ "+(qi+1)+" จาก "+QUESTIONS.length;
+  $("qtext").textContent=QUESTIONS[qi].q;
+  $("choices").innerHTML="";
+  QUESTIONS[qi].a.forEach((opt,i)=>{
+    const b=document.createElement("button");
+    b.className="choice";b.innerHTML=`<em>${opt.e}</em><span>${opt.t}</span>`;
+    b.onclick=()=>pick(i);
+    $("choices").appendChild(b);
+  });
+  $("back").classList.toggle("hidden",qi===0);
+}
+function pick(i){
+  answers[qi]=i;
+  const s=QUESTIONS[qi].a[i].s;
+  for(const k in s) scores[k]+=s[k];
+  qi++;
+  if(qi<QUESTIONS.length){show("s-quiz");renderQ();} else divine();
+}
+$("back").onclick=()=>{
+  qi--;const s=QUESTIONS[qi].a[answers[qi]].s;for(const k in s) scores[k]-=s[k];renderQ();
+};
+
+/* ---------- ช่วงทำนาย + ตรวจจับการโบกมือ ---------- */
+let waiting=false, barTimer=null;
+function divine(){
+  show("s-wait");waiting=true;
+  $("waveHint").classList.toggle("hidden",!camReady);
+  let p=0;
+  clearInterval(barTimer);
+  barTimer=setInterval(()=>{p=Math.min(100,p+4);$("barFill").style.width=p+"%";
+    if(p>=100){clearInterval(barTimer);if(waiting)finish();}},110);
+}
+$("reveal").onclick=()=>{if(waiting)finish();};
+
+function finish(){
+  waiting=false;clearInterval(barTimer);
+  const order=Object.keys(PATHS).sort((a,b)=>scores[b]-scores[a]);
+  const top=order[0], p=PATHS[top], max=scores[top]||1;
+  $("rTitle").textContent=p.name;
+  $("rTagline").textContent=p.tagline;
+  $("rWho").textContent=p.who;
+  $("rWhy").textContent=p.why;
+  $("rJobs").innerHTML=p.jobs.map(j=>`<span class="tag">${j}</span>`).join("");
+  $("rPower").innerHTML="<h3 style='margin-bottom:10px'>พลังที่แม่หมออ่านได้</h3>"+
+    order.slice(0,3).map(k=>`<div><span>${PATHS[k].name.replace(/^(นัก|ผู้)/,"")}</span><i style="--w:${Math.round(scores[k]/max*100)}%"></i></div>`).join("");
+  show("s-result");
+  saveLog(p.name);
+}
+
+/* ---------- Log ไม่ระบุตัวตน ---------- */
+const two=n=>String(n).padStart(2,"0");
+function today(){const d=new Date();return d.getFullYear()+"-"+two(d.getMonth()+1)+"-"+two(d.getDate());}
+function readLog(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}}
+function saveLog(result){
+  const log=readLog(), d=new Date(), date=today();
+  const n=log.filter(r=>r.date===date).length+1;
+  log.push({sid:"S-"+date.replace(/-/g,"")+"-"+two(n),date:date,
+    time:two(d.getHours())+":"+two(d.getMinutes())+":"+two(d.getSeconds()),
+    result:result, sec:Math.round((Date.now()-startedAt)/1000)});
+  try{localStorage.setItem(KEY,JSON.stringify(log))}catch(e){}
+}
+function openPanel(){
+  const log=readLog(), date=today();
+  $("cToday").textContent=log.filter(r=>r.date===date).length;
+  $("cAll").textContent=log.length;
+  $("cDays").textContent=new Set(log.map(r=>r.date)).size;
+  const c={};log.forEach(r=>c[r.result]=(c[r.result]||0)+1);
+  const top=Object.keys(c).sort((a,b)=>c[b]-c[a])[0];
+  $("cTop").textContent=top?top:"—";
+  $("cTop").style.fontSize="18px";
+  $("logRows").innerHTML=log.slice().reverse().map(r=>
+    `<tr><td>${r.date}</td><td>${r.time}</td><td>${r.sid}</td><td>${r.result}</td><td>${r.sec} วิ</td></tr>`).join("")
+    || `<tr><td colspan="5" style="color:#9A88B4">ยังไม่มีผู้เล่นในเครื่องนี้ ให้เพื่อนลองเล่นดูก่อน</td></tr>`;
+  $("panel").classList.remove("hidden");
+}
+$("logBtn").onclick=openPanel;
+$("closePanel").onclick=()=>$("panel").classList.add("hidden");
+addEventListener("keydown",e=>{if(e.key==="l"||e.key==="L")openPanel();if(e.key==="Escape")$("panel").classList.add("hidden");});
+$("csv").onclick=()=>{
+  const rows=[["session_id","date","time","result","duration_sec"],
+    ...readLog().map(r=>[r.sid,r.date,r.time,r.result,r.sec])];
+  const csv="\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="maemor-vr-log-"+today()+".csv";a.click();
+};
+$("clear").onclick=()=>{if(confirm("ล้างบันทึกผู้เข้าร่วมทั้งหมดในเครื่องนี้?")){localStorage.removeItem(KEY);openPanel();}};
+
+/* ---------- ปุ่มหลัก ---------- */
+$("go").onclick=()=>{resetScores();qi=0;startedAt=Date.now();show("s-quiz");renderQ();};
+$("again").onclick=()=>{show("s-intro");};
+$("share").onclick=()=>{
+  $("allList").innerHTML=Object.values(PATHS).map(p=>
+    `<h3>${p.name}</h3><p>${p.tagline} — ${p.jobs.join(" · ")}</p>`).join("");
+  show("s-all");
+};
+$("closeAll").onclick=()=>show("s-result");
+
+/* ---------- Webcam ในลูกแก้ว + ตรวจจับการเคลื่อนไหว ---------- */
+let camReady=false;
+const video=$("cam"), mc=$("motion"), mctx=mc.getContext("2d",{willReadFrequently:true});
+let prev=null, hits=0;
+(async function initCam(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{width:320,height:240},audio:false});
+    video.srcObject=stream;camReady=true;
+    $("camHint").textContent="โบกมือหน้ากล้องได้เลย";
+    setTimeout(()=>$("camHint").style.opacity=".0",2600);
+    requestAnimationFrame(loopMotion);
+  }catch(e){
+    camReady=false;
+    $("camHint").textContent="ไม่มีกล้อง — กดปุ่มเล่นได้ตามปกติ";
+    video.style.display="none";
+  }
+})();
+function loopMotion(){
+  if(camReady&&video.videoWidth){
+    mctx.drawImage(video,0,0,64,48);
+    const cur=mctx.getImageData(0,0,64,48).data;
+    if(prev){
+      let diff=0;
+      for(let i=0;i<cur.length;i+=16){diff+=Math.abs(cur[i]-prev[i]);}
+      const moved=diff/(cur.length/16);
+      if(moved>26){hits++;}else{hits=Math.max(0,hits-1);}
+      if(hits>4){
+        hits=0;
+        if(waiting){finish();}
+        else if(!$("s-intro").classList.contains("hidden")){$("go").click();}
+      }
+    }
+    prev=cur;
+  }
+  requestAnimationFrame(loopMotion);
+}
+
+/* ---------- ดาวพร่างพราวเป็นฉากหลัง ---------- */
+const cv=$("stars"),cx=cv.getContext("2d");let dots=[];
+function sizeStars(){cv.width=innerWidth;cv.height=innerHeight;
+  dots=Array.from({length:Math.min(110,Math.round(innerWidth/13))},()=>({
+    x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.5+.3,
+    s:Math.random()*.25+.05,o:Math.random()}));}
+sizeStars();addEventListener("resize",sizeStars);
+(function twinkle(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  dots.forEach(d=>{d.y-=d.s;if(d.y<0)d.y=cv.height;d.o+=(Math.random()-.5)*.08;d.o=Math.max(.15,Math.min(1,d.o));
+    cx.fillStyle="rgba(240,200,106,"+d.o*.75+")";cx.beginPath();cx.arc(d.x,d.y,d.r,0,7);cx.fill();});
+  requestAnimationFrame(twinkle);
+})();
+</script>
+</body>
+</html>
