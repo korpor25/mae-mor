@@ -105,7 +105,7 @@ body[data-size="lg"] .choice{min-height:112px}
 
 /* แถบกล้องสำหรับเลือกคำตอบด้วยมือ */
 .camwrap{position:relative;width:min(660px,100%);margin:18px auto 0;border-radius:20px;overflow:hidden;
-  border:2px solid var(--gold-line);background:#100722;aspect-ratio:16/7.4}
+  border:2px solid var(--gold-line);background:#100722;aspect-ratio:16/5.4}
 #cam2{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);opacity:.8}
 .zones{position:absolute;inset:0;display:flex}
 .zone{flex:1;position:relative;display:grid;place-items:center;border-right:2px solid rgba(255,255,255,.28)}
@@ -273,16 +273,16 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
       <div class="track" id="track" aria-hidden="true"></div>
     </div>
     <h2 class="q" id="qtext"></h2>
-    <p class="small" style="margin-top:10px">ยืนนิ่ง ๆ ให้กล้องจำพื้นหลังสักครู่ แล้ว<b>ยกมือขึ้นเหนือหมายเลขที่เลือก</b> ค้างไว้ราว 1.5 วินาที หรือกดปุ่มด้านล่างก็ได้</p>
+    <p class="small" style="margin-top:10px">ยืนนิ่ง ๆ ให้กล้องจำพื้นหลังสักครู่ แล้ว<b>ยกมือขึ้นเหนือหมายเลขที่เลือก</b> ค้างไว้ราวครึ่งวินาที หรือกดปุ่มด้านล่างก็ได้</p>
     <div class="camwrap">
       <video id="cam2" autoplay muted playsinline aria-hidden="true"></video>
       <div class="zones" id="zones" aria-hidden="true"></div>
       <div class="camoff hidden" id="camoff">ตอนนี้ยังไม่ได้ใช้กล้อง — เลือกคำตอบด้วยการกดปุ่มด้านล่างได้เลย</div>
     </div>
-    <p class="camnote" id="zhint">ยกมือขึ้นเหนือหมายเลขที่เลือก ค้างไว้ 1.5 วินาที</p>
+    <p class="camnote" id="zhint">ยกมือขึ้นเหนือหมายเลขที่เลือก</p>
     <div class="camctl" id="camctl">
       <label for="sens">ความไวกล้อง</label>
-      <input id="sens" type="range" min="1" max="5" step="1" value="4">
+      <input id="sens" type="range" min="1" max="5" step="1" value="3">
       <button class="tool" id="recal" type="button">จำพื้นหลังใหม่</button>
     </div>
     <p class="camnote">กล้องใช้ตรวจจับการเคลื่อนไหวเท่านั้น ไม่บันทึกภาพ · กดตัวเลข 1–5 บนคีย์บอร์ดก็ได้</p>
@@ -355,7 +355,7 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
   </div>
 </div>
 
-<canvas id="motion" width="96" height="54" class="hidden"></canvas>
+<canvas id="motion" width="64" height="48" class="hidden"></canvas>
 
 <script>
 /* ---------- สายอาชีพ 6 กลุ่ม ---------- */
@@ -578,16 +578,14 @@ $("tTheme").onclick=e=>{
 };
 
 /* ---------- กล้องในลูกแก้ว + ตรวจจับการโบกมือ ---------- */
-const W=96,H=54;                       // ขนาดภาพที่ใช้วิเคราะห์ (สัดส่วนใกล้แถบกล้องที่ผู้เล่นเห็น)
-const HOLD_MS=1500;                    // ยกมือค้างกี่มิลลิวินาทีจึงนับว่าเลือก
-const LOCK_MS=1400;                    // หลังเลือกแล้ว หยุดรับคำสั่งกี่มิลลิวินาที (รอให้ลดมือลง)
-const A_BG=0.020;                      // ความเร็วปรับพื้นหลังของจุดที่ว่าง (ตามแสงที่เปลี่ยน) ต่อ 1 เฟรม
-const A_FG=0.0016;                     // จุดที่เห็นเป็นวัตถุ ปรับช้ากว่ามาก เพื่อให้ "มือที่ยกค้าง" ไม่จมหายไป
-const AGE_MS=4000;                     // ของที่นิ่งอยู่กับที่เกิน 4 วินาที ให้ถือเป็นพื้นหลัง (เช่น ตัวคนที่ยืนรอ)
-const CAP=0.14;                        // ถ้าภาพเปลี่ยนเกินนี้ แปลว่ามีคนเดินเข้าออก ให้หยุดตรวจชั่วคราว
-const SETTLE_MS=700;                   // หลังภาพนิ่งแล้ว รออีกกี่มิลลิวินาทีจึงเริ่มตรวจใหม่
-const WARM_MS=600;                     // จำพื้นหลังนานเท่าไรจึงเริ่มเชื่อผลตรวจ
-let SENS=4;                            // ระดับความไว 1–5 ปรับได้จากแถบใต้กล้อง
+const W=64,H=48;                       // ขนาดภาพที่ใช้วิเคราะห์
+const HOLD=18;                         // ยกมือค้างกี่เฟรมจึงนับว่าเลือก (~0.3 วินาที)
+const A_BG=0.020;                      // ความเร็วปรับพื้นหลังของจุดที่ว่าง (ตามแสงที่เปลี่ยน)
+const A_FG=0.0020;                     // จุดที่เห็นเป็นวัตถุ ปรับช้ากว่ามาก เพื่อให้ "มือที่ยกค้าง" ไม่จมหายไป
+const AGE=180;                         // ของที่นิ่งอยู่กับที่เกิน 3 วินาที ให้ถือเป็นพื้นหลัง (เช่น ตัวคนที่ยืนรอ)
+const CAP=0.12;                        // ถ้าภาพเปลี่ยนเกินนี้ แปลว่ามีคนเดินเข้าออก ให้หยุดตรวจชั่วคราว
+const SETTLE=40;                       // หลังภาพนิ่งแล้ว รออีกกี่เฟรมจึงเริ่มตรวจใหม่
+let SENS=3;                            // ระดับความไว 1–5 ปรับได้จากแถบใต้กล้อง
 let camReady=false, camOn=true, stream=null, prev=null, bg=null, age=null;
 let hits=0, dwell=[], lockUntil=0, warmup=0, settle=0, busy=false;
 const video=$("cam"), video2=$("cam2"), mctx=$("motion").getContext("2d",{willReadFrequently:true});
@@ -596,23 +594,11 @@ const video=$("cam"), video2=$("cam2"), mctx=$("motion").getContext("2d",{willRe
 function activeVideo(){
   return $("s-quiz").classList.contains("hidden") ? video : video2;
 }
-
-// หาขอบเขตภาพที่ "ผู้เล่นมองเห็นจริง" บนจอ — วิดีโอถูกแสดงแบบ object-fit:cover จึงถูกครอบไว้
-// ถ้าไม่ครอบให้ตรงกัน มือที่บังเต็มช่องบนจอจะถูกคิดเป็นสัดส่วนเล็กนิดเดียวจนตรวจไม่เจอ
-function sourceRect(v){
-  const vw=v.videoWidth, vh=v.videoHeight;
-  const cw=v.clientWidth, ch=v.clientHeight;
-  if(!vw||!vh||!cw||!ch)return{sx:0,sy:0,sw:vw||1,sh:vh||1};
-  const sc=Math.max(cw/vw,ch/vh);
-  const sw=Math.min(vw,cw/sc), sh=Math.min(vh,ch/sc);
-  return{sx:(vw-sw)/2,sy:(vh-sh)/2,sw,sh};
-}
 function resetVision(){prev=null;bg=null;age=null;warmup=0;settle=0;dwell=dwell.map(()=>0);}
-addEventListener("resize",resetVision);   // กรอบภาพที่เห็นเปลี่ยนไป ต้องจำพื้นหลังใหม่
 
 async function openCam(){
   try{
-    stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480}},audio:false});
+    stream=await navigator.mediaDevices.getUserMedia({video:{width:320,height:240},audio:false});
     video.srcObject=stream;video2.srcObject=stream;
     camReady=true;camOn=true;video.style.visibility="visible";resetVision();
     $("camMsg").textContent="กล้องพร้อมแล้ว โบกมือหน้ากล้องเพื่อเริ่มเล่นได้เลย";
@@ -639,7 +625,7 @@ openCam();
 function paintZones(best,on){
   const cells=$("zones").children;
   for(let i=0;i<cells.length;i++){
-    const pct=Math.min(100,Math.round(dwell[i]/HOLD_MS*100));
+    const pct=Math.min(100,Math.round(dwell[i]/HOLD*100));
     cells[i].querySelector(".zfill").style.height=pct+"%";
     cells[i].classList.toggle("hot",i===best&&on);
     const c=$("choices").children[i];
@@ -647,32 +633,22 @@ function paintZones(best,on){
   }
 }
 
-let lastT=0;
-(function loopMotion(t){
-  const now=t||performance.now();
-  const dt=lastT?Math.min(100,now-lastT):16;  // นับเวลาจริง ไม่ผูกกับจำนวนเฟรมของเครื่อง
-  lastT=now;
+(function loopMotion(){
   const v=activeVideo();
   if(camOn&&camReady&&v.videoWidth&&v.readyState>=2){
-    const r=sourceRect(v);
-    mctx.drawImage(v,r.sx,r.sy,r.sw,r.sh,0,0,W,H);
+    mctx.drawImage(v,0,0,W,H);
     const d=mctx.getImageData(0,0,W,H).data;
     const cur=new Float32Array(W*H);
     for(let i=0,p=0;i<cur.length;i++,p+=4)cur[i]=(d[p]+d[p+1]+d[p+2])/3;
 
-    // ยังไม่มีภาพพื้นหลัง — ถ้าเพิ่งเลือกไป ให้รอจนพ้นช่วงล็อกก่อน
-    // มิฉะนั้นมือที่ยังยกค้างอยู่จะถูกจำเป็นพื้นหลัง แล้วข้อถัดไปจะตรวจไม่เจอ
-    if(!bg){
-      if(Date.now()<lockUntil){prev=cur;requestAnimationFrame(loopMotion);return;}
-      bg=cur.slice();age=new Float32Array(cur.length);prev=cur;warmup=0;
-      requestAnimationFrame(loopMotion);return;
-    }
-    warmup+=dt;
+    if(!bg){bg=cur.slice();age=new Uint16Array(cur.length);prev=cur;warmup=0;
+      requestAnimationFrame(loopMotion);return;}
+    warmup++;
 
     const onQuiz=!$("s-quiz").classList.contains("hidden");
     const n=onQuiz?QUESTIONS[qi].a.length:1;
-    const TH=[0,36,28,22,17,13][SENS];        // ต่างจากพื้นหลังเท่าไรจึงถือว่ามีของมาบัง
-    const NEED=[0,.17,.13,.10,.075,.055][SENS]; // ต้องบังพื้นที่ในช่องกี่ส่วนจึงนับว่าเลือก
+    const TH=[0,40,32,26,21,17][SENS];        // ต่างจากพื้นหลังเท่าไรจึงถือว่ามีของมาบัง
+    const NEED=[0,.20,.16,.12,.09,.07][SENS]; // ต้องบังพื้นที่ในช่องกี่ส่วนจึงนับว่าเลือก
     const fgMask=new Uint8Array(cur.length);
     const fg=new Array(n).fill(0), tot=new Array(n).fill(0);
     let all=0, move=0;
@@ -689,49 +665,45 @@ let lastT=0;
     }
     move/=cur.length;
     busy=all/cur.length>CAP;                  // มีคนเดินเข้าออกหรือภาพเปลี่ยนทั้งจอ
-    settle=busy?SETTLE_MS:Math.max(0,settle-dt);
+    settle=busy?SETTLE:Math.max(0,settle-1);
     const ratio=fg.map((f,i)=>f/tot[i]);
     let best=0;for(let i=1;i<n;i++)if(ratio[i]>ratio[best])best=i;
     const second=n>1?Math.max(...ratio.filter((_,i)=>i!==best)):0;
-    const ready=warmup>WARM_MS&&!busy&&settle===0;
+    const ready=warmup>25&&!busy&&settle===0;
 
     if(onQuiz){
-      const strong=ready&&ratio[best]>NEED&&ratio[best]>second*1.25;
+      const strong=ready&&ratio[best]>NEED&&ratio[best]>second*1.35;
       if(strong&&Date.now()>lockUntil){
-        dwell[best]=Math.min(HOLD_MS,dwell[best]+dt);
-        for(let i=0;i<n;i++)if(i!==best)dwell[i]=Math.max(0,dwell[i]-dt*2);
+        dwell[best]=Math.min(HOLD,dwell[best]+1);
+        for(let i=0;i<n;i++)if(i!==best)dwell[i]=Math.max(0,dwell[i]-2);
       }else{
-        // ลดช้ากว่าตอนสะสม เพื่อให้มือสั่นหรือหลุดเฟรมชั่วครู่ไม่ทำให้เริ่มนับใหม่
-        for(let i=0;i<n;i++)dwell[i]=Math.max(0,dwell[i]-dt*0.6);
+        for(let i=0;i<n;i++)dwell[i]=Math.max(0,dwell[i]-1);
       }
       paintZones(strong?best:-1,strong);
-      const left=Math.max(0,(HOLD_MS-dwell[best])/1000).toFixed(1);
       $("zhint").textContent = !ready ? "กำลังจำพื้นหลัง ยืนนิ่ง ๆ สักครู่…"
-        : strong ? "เห็นมือที่ช่อง "+(best+1)+" แล้ว ค้างไว้อีก "+left+" วินาที"
-        : "ยกมือขึ้นเหนือหมายเลขที่เลือก ค้างไว้ 1.5 วินาที";
-      if(dwell[best]>=HOLD_MS&&Date.now()>lockUntil){
-        lockUntil=Date.now()+LOCK_MS;dwell=dwell.map(()=>0);paintZones(-1,false);
+        : strong ? "เห็นมือที่ช่อง "+(best+1)+" แล้ว ค้างไว้อีกนิด"
+        : "ยกมือขึ้นเหนือหมายเลขที่เลือก";
+      if(dwell[best]>=HOLD&&Date.now()>lockUntil){
+        lockUntil=Date.now()+1000;dwell=dwell.map(()=>0);paintZones(-1,false);
         pick(best);
         resetVision();                        // ขึ้นข้อใหม่ ให้จำพื้นหลังใหม่ทุกครั้ง
         requestAnimationFrame(loopMotion);return;
       }
     }else{
-      // นอกหน้าคำถาม ใช้การโบกมือทั้งจอเป็นตัวสั่งงาน (สะสมเป็นมิลลิวินาที)
-      if(move>10||(ready&&ratio[0]>.12))hits+=dt;else hits=Math.max(0,hits-dt);
-      if(hits>250&&Date.now()>lockUntil){
-        hits=0;lockUntil=Date.now()+LOCK_MS;
+      // นอกหน้าคำถาม ใช้การโบกมือทั้งจอเป็นตัวสั่งงาน
+      if(move>10||(ready&&ratio[0]>.12))hits++;else hits=Math.max(0,hits-1);
+      if(hits>8&&Date.now()>lockUntil){
+        hits=0;lockUntil=Date.now()+1200;
         if(waiting)finish();
         else if(!$("s-intro").classList.contains("hidden"))start();
       }
     }
 
     // ปรับภาพพื้นหลัง: จุดว่างปรับเร็วตามแสง จุดที่เห็นเป็นวัตถุปรับช้า
-    // ส่วนของที่อยู่นิ่งเกิน 4 วินาที (เช่น ตัวคนที่ยืนรอ) ให้กลืนเป็นพื้นหลัง เหลือแต่มือที่เพิ่งยกขึ้น
-    const k=dt/16.7;                          // ปรับความเร็วตามเวลาจริง ไม่ผูกกับจำนวนเฟรม
-    const rFg=Math.min(1,A_FG*k), rBg=Math.min(1,A_BG*k);
+    // ส่วนของที่อยู่นิ่งเกิน 3 วินาที (เช่น ตัวคนที่ยืนรอ) ให้กลืนเป็นพื้นหลัง เหลือแต่มือที่เพิ่งยกขึ้น
     for(let i=0;i<cur.length;i++){
-      if(fgMask[i]&&!busy)age[i]+=dt;else age[i]=0;
-      bg[i]+=(cur[i]-bg[i])*((fgMask[i]&&!busy&&age[i]<AGE_MS)?rFg:rBg);
+      if(fgMask[i]&&!busy)age[i]++;else age[i]=0;
+      bg[i]+=(cur[i]-bg[i])*((fgMask[i]&&!busy&&age[i]<AGE)?A_FG:A_BG);
     }
     prev=cur;
   }
