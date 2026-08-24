@@ -166,7 +166,7 @@ h1 span{color:var(--gold)}
   border-radius:999px;border:1px solid var(--gold-line);background:var(--card)}
 
 /* ---------- 6. หน้าคำถาม ---------- */
-/* จอเล็กให้ตัวเลือกอยู่ก่อนกล้อง จะได้ไม่ต้องเลื่อนผ่านกล้องทุกข้อ */
+/* คำถามกับตัวเลือกต้องติดกันเสมอ — กล่องกล้องเป็นของเสริม จึงอยู่ท้ายสุด */
 #s-quiz{display:flex;flex-direction:column}
 #s-quiz .progress{order:1}
 #s-quiz .q{order:2}
@@ -174,34 +174,36 @@ h1 span{color:var(--gold)}
 #s-quiz .campanel{order:4}
 #s-quiz .row{order:5}
 
-.progress{width:100%;max-width:420px;margin:0 auto 16px}
+.progress{width:100%;max-width:420px;margin:0 auto 14px}
 .progress p{font-family:var(--font-display);font-size:.86em;color:var(--gold);margin-bottom:8px}
 .progress .track{display:flex;gap:6px;justify-content:center}
 .progress b{flex:1;max-width:64px;height:7px;border-radius:99px;
   background:var(--card);border:1px solid var(--gold-line)}
 .progress b.on{background:var(--gold);border-color:var(--gold)}
 
-.q{font-family:var(--font-display);font-size:clamp(22px,5.6vw,32px);line-height:1.45;
+.q{font-family:var(--font-display);font-size:clamp(21px,5.2vw,30px);line-height:1.42;
   max-width:min(100%,28ch);margin:0 auto}
 
-.choices{display:grid;gap:12px;width:100%;max-width:var(--maxw);margin:20px auto 0;text-align:left}
+/* ตัวเลือก — ยิ่งกล่องเตี้ยและไอคอนเล็ก ยิ่งเห็นครบทุกข้อในจอเดียว เปรียบเทียบง่ายกว่า */
+.choices{display:grid;gap:9px;width:100%;max-width:var(--maxw);margin:16px auto 0;text-align:left}
 .choice{
-  display:flex;gap:13px;align-items:center;width:100%;
-  padding:13px;min-height:76px;border-radius:var(--r-md);cursor:pointer;
-  background:var(--card);border:2px solid var(--gold-line);color:var(--text);
-  font-family:var(--font-body);font-size:.98em;line-height:1.5;text-align:left;
+  display:flex;gap:11px;align-items:center;width:100%;
+  padding:10px 12px;min-height:62px;border-radius:14px;cursor:pointer;
+  background:var(--card);border:1.5px solid var(--gold-line);color:var(--text);
+  font-family:var(--font-body);font-size:.92em;line-height:1.42;text-align:left;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;
   transition:background .14s,border-color .14s,transform .12s;
 }
-.choice .num{flex:0 0 30px;height:30px;border-radius:50%;background:var(--gold);color:#3A1D00;
-  display:grid;place-items:center;font-weight:700;font-size:15px;font-family:var(--font-display)}
-.choice svg{flex:0 0 50px;width:50px;height:50px}
+.choice span:last-child{flex:1;min-width:0}
+.choice .num{flex:0 0 24px;height:24px;border-radius:50%;background:var(--gold);color:#3A1D00;
+  display:grid;place-items:center;font-weight:700;font-size:13px;font-family:var(--font-display)}
+.choice svg{flex:0 0 38px;width:38px;height:38px}
 .choice:active{transform:scale(.985);background:var(--card-hover)}
 @media(hover:hover){.choice:hover{background:var(--card-hover);border-color:var(--gold);transform:translateY(-2px)}}
 .choice.hot{border-color:var(--gold);background:var(--card-hover)}
 
 /* กล่องกล้อง — เป็นทางเลือกเสริม จึงจัดเป็นกล่องแยกที่ดูเบากว่าตัวเลือก */
-.campanel{width:100%;max-width:var(--maxw);margin:22px auto 0;padding:14px;
+.campanel{width:100%;max-width:var(--maxw);margin:18px auto 0;padding:14px;
   border:1.5px solid var(--gold-line);border-radius:var(--r-lg);background:var(--sunken)}
 .campanel-head{font-family:var(--font-display);font-size:.92em;font-weight:700;
   color:var(--gold);margin-bottom:10px}
@@ -296,8 +298,10 @@ th{color:var(--gold);font-size:.92em}
   .row{flex-direction:row;justify-content:center;flex-wrap:wrap;max-width:none;gap:12px}
   .row .btn{width:auto}
   .lead{font-size:1.04em}
-  .choice{padding:16px;gap:16px;min-height:92px;font-size:1em}
-  .choice svg{flex-basis:58px;width:58px;height:58px}
+  .choices{gap:10px}
+  .choice{padding:12px 14px;gap:13px;min-height:70px;font-size:.95em}
+  .choice .num{flex-basis:26px;height:26px;font-size:14px}
+  .choice svg{flex-basis:44px;width:44px;height:44px}
   .card{padding:24px}
   .campanel{padding:18px}
   .stat{display:flex;gap:28px;flex-wrap:wrap}
@@ -310,15 +314,12 @@ th{color:var(--gold);font-size:.92em}
   .seer{width:min(340px,60vw)}
   .choices{max-width:860px;grid-template-columns:1fr 1fr}
   .campanel{max-width:860px}
-  /* จอใหญ่มีที่พอ ให้กล้องอยู่เหนือตัวเลือกเหมือนเดิม ผู้เล่นที่ยืนห่างจะเห็นครบในตาเดียว */
-  #s-quiz .campanel{order:3}
-  #s-quiz .choices{order:4}
   .power div{grid-template-columns:minmax(0,38%) 1fr;align-items:center;gap:14px;margin-bottom:10px}
 }
 
 /* ---------- 12. โหมดตัวอักษรใหญ่ (ต้องอยู่ท้ายสุดเพื่อทับค่าด้านบน) ---------- */
 body[data-size="lg"]{--base:21px}
-body[data-size="lg"] .choice{min-height:96px}
+body[data-size="lg"] .choice{min-height:78px;font-size:.96em}
 body[data-size="lg"] .camctl,body[data-size="lg"] .camnote-fine{font-size:1em}
 @media(min-width:900px){body[data-size="lg"]{--base:24px}}
 
