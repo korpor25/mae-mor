@@ -103,6 +103,22 @@ h1 span{color:var(--gold)}
 .choice svg{flex:0 0 60px;width:60px;height:60px}
 body[data-size="lg"] .choice{min-height:112px}
 
+/* แถบกล้องสำหรับเลือกคำตอบด้วยมือ */
+.camwrap{position:relative;width:min(660px,100%);margin:18px auto 0;border-radius:20px;overflow:hidden;
+  border:2px solid var(--gold-line);background:#100722;aspect-ratio:16/5.4}
+#cam2{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);opacity:.8}
+.zones{position:absolute;inset:0;display:flex}
+.zone{flex:1;position:relative;display:grid;place-items:center;border-right:2px solid rgba(255,255,255,.28)}
+.zone:last-child{border-right:0}
+.zone .zfill{position:absolute;bottom:0;left:0;right:0;height:0;background:rgba(255,214,132,.6)}
+.zone .znum{position:relative;font-family:var(--font-display);font-size:30px;font-weight:700;color:#fff;
+  text-shadow:0 2px 8px #000,0 0 3px #000}
+.zone.hot{box-shadow:inset 0 0 0 3px var(--gold)}
+.camoff{position:absolute;inset:0;display:grid;place-items:center;background:rgba(20,8,35,.85);
+  color:var(--text);font-size:.9em;padding:12px;text-align:center}
+.choice.hot{border-color:var(--gold);background:var(--card-hover)}
+.camnote{font-size:.8em;color:var(--text-2);margin:8px 0 0}
+
 /* กำลังทำนาย */
 .bar{width:min(340px,82vw);height:10px;border-radius:99px;background:var(--card);border:1px solid var(--gold-line);
   margin:24px auto 0;overflow:hidden}
@@ -239,9 +255,9 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
         </div>
       </div>
     </div>
-    <p class="lead">ตอบคำถามง่าย ๆ 6 ข้อ แล้วแม่หมอจะทำนายว่าคุณเหมาะกับงานสายไอทีแบบไหน<br>ไม่มีคำตอบผิด ไม่ต้องเคยเรียนคอมพิวเตอร์มาก่อน</p>
+    <p class="lead">ตอบคำถามง่าย ๆ 6 ข้อ ด้วยการ<b>ยกมือหน้ากล้อง</b> แล้วแม่หมอจะทำนายว่าคุณเหมาะกับงานสายไอทีแบบไหน<br>ไม่มีคำตอบผิด ไม่ต้องเคยเรียนคอมพิวเตอร์มาก่อน</p>
     <div class="row"><button class="btn" id="go">เริ่มเปิดคำทำนาย</button></div>
-    <p class="small" style="margin-top:14px">ใช้เวลาประมาณ 3 นาที · ไม่ถามชื่อและไม่เก็บข้อมูลส่วนตัว<br>
+    <p class="small" style="margin-top:14px">ใช้เวลาประมาณ 3 นาที · เล่นแบบออฟไลน์ ไม่ต้องต่ออินเทอร์เน็ต · ไม่ถามชื่อและไม่เก็บข้อมูลส่วนตัว<br>
       <span id="camMsg">กำลังเปิดกล้อง…</span></p>
   </section>
 
@@ -252,7 +268,13 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
       <div class="track" id="track" aria-hidden="true"></div>
     </div>
     <h2 class="q" id="qtext"></h2>
-    <p class="small" style="margin-top:10px">เลือกข้อที่ใกล้เคียงตัวคุณที่สุด (กดตัวเลข 1–5 บนคีย์บอร์ดก็ได้)</p>
+    <p class="small" style="margin-top:10px">ยกมือค้างไว้เหนือหมายเลขที่เลือกในกรอบกล้อง หรือกดปุ่มด้านล่างก็ได้</p>
+    <div class="camwrap">
+      <video id="cam2" autoplay muted playsinline aria-hidden="true"></video>
+      <div class="zones" id="zones" aria-hidden="true"></div>
+      <div class="camoff hidden" id="camoff">ตอนนี้ยังไม่ได้ใช้กล้อง — เลือกคำตอบด้วยการกดปุ่มด้านล่างได้เลย</div>
+    </div>
+    <p class="camnote">กล้องใช้ตรวจจับการเคลื่อนไหวเท่านั้น ไม่บันทึกภาพ · กดตัวเลข 1–5 บนคีย์บอร์ดก็ได้</p>
     <div class="choices" id="choices" role="group" aria-labelledby="qtext"></div>
     <div class="row"><button class="btn ghost small" id="back">ย้อนกลับ</button></div>
   </section>
@@ -297,7 +319,7 @@ th{color:var(--gold);font-size:.9em;letter-spacing:.06em}
   </section>
 </div>
 
-<footer>ไม่เก็บชื่อและข้อมูลส่วนตัว · <button id="logBtn">บันทึกผู้เข้าร่วม (กด L)</button></footer>
+<footer>ทำงานแบบออฟไลน์ · ไม่เก็บชื่อและข้อมูลส่วนตัว · <button id="logBtn">บันทึกผู้เข้าร่วม (กด L)</button></footer>
 
 <!-- แผงบันทึกผู้เข้าร่วม -->
 <div class="panel hidden" id="panel" role="dialog" aria-label="บันทึกผู้เข้าร่วมกิจกรรม">
@@ -424,6 +446,17 @@ function renderQ(){
     box.appendChild(b);
   });
   $("back").classList.toggle("hidden",qi===0);
+  // สร้างโซนกล้องให้ตรงกับจำนวนตัวเลือกของข้อนี้
+  const n=QUESTIONS[qi].a.length;
+  $("zones").innerHTML=Array.from({length:n},(_,i)=>
+    `<div class="zone" data-i="${i}"><span class="zfill"></span><span class="znum">${i+1}</span></div>`).join("");
+  dwell=new Array(n).fill(0);
+  updateCamOverlay();
+}
+function updateCamOverlay(){
+  const live=camOn&&camReady;
+  $("camoff").classList.toggle("hidden",live);
+  $("cam2").style.visibility=live?"visible":"hidden";
 }
 function pick(i){
   if($("s-quiz").classList.contains("hidden"))return;
@@ -533,38 +566,87 @@ $("tTheme").onclick=e=>{
 };
 
 /* ---------- กล้องในลูกแก้ว + ตรวจจับการโบกมือ ---------- */
-let camReady=false, camOn=true, stream=null, prev=null, hits=0;
-const video=$("cam"), mctx=$("motion").getContext("2d",{willReadFrequently:true});
+const W=64,H=48;                       // ขนาดภาพที่ใช้วิเคราะห์ (เล็กเพื่อให้ลื่นบนโน้ตบุ๊ก)
+const HOLD=26;                         // ต้องยกมือค้างกี่เฟรมจึงนับว่าเลือก (~0.45 วินาที)
+const MOVE=16;                         // ระดับการเคลื่อนไหวขั้นต่ำของโซน
+let camReady=false, camOn=true, stream=null, prev=null, hits=0, dwell=[], lockUntil=0;
+const video=$("cam"), video2=$("cam2"), mctx=$("motion").getContext("2d",{willReadFrequently:true});
+
 async function openCam(){
   try{
     stream=await navigator.mediaDevices.getUserMedia({video:{width:320,height:240},audio:false});
-    video.srcObject=stream;camReady=true;camOn=true;
-    $("camMsg").textContent="ลูกแก้วเปิดกล้องแล้ว โบกมือหน้ากล้องเพื่อเล่นได้";
+    video.srcObject=stream;video2.srcObject=stream;
+    camReady=true;camOn=true;video.style.visibility="visible";
+    $("camMsg").textContent="กล้องพร้อมแล้ว โบกมือหน้ากล้องเพื่อเริ่มเล่นได้เลย";
     $("tCam").textContent="ปิดกล้อง";
   }catch(e){
     camReady=false;$("tCam").textContent="เปิดกล้อง";
-    $("camMsg").textContent="ยังไม่ได้ใช้กล้อง — กดปุ่มเล่นได้ตามปกติ";
+    $("camMsg").textContent="ยังไม่ได้ใช้กล้อง — กดปุ่มเล่นได้ตามปกติ (ดูวิธีเปิดกล้องในไฟล์ อ่านก่อนเล่น.txt)";
   }
+  updateCamOverlay();
 }
 function closeCam(){
   if(stream)stream.getTracks().forEach(t=>t.stop());
-  stream=null;camReady=false;camOn=false;prev=null;
+  stream=null;camReady=false;camOn=false;prev=null;dwell=dwell.map(()=>0);
   video.style.visibility="hidden";
-  $("camMsg").textContent="ปิดกล้องอยู่ — เล่นด้วยการกดปุ่มได้ปกติ";
+  $("camMsg").textContent="ปิดกล้องอยู่ — เล่นด้วยการกดปุ่มได้ตามปกติ";
   $("tCam").textContent="เปิดกล้อง";
+  updateCamOverlay();
 }
-$("tCam").onclick=()=>{if(camOn&&stream){closeCam();}else{video.style.visibility="visible";openCam();}};
+$("tCam").onclick=()=>{camOn&&stream?closeCam():openCam();};
 openCam();
+
+function paintZones(best){
+  const cells=$("zones").children;
+  for(let i=0;i<cells.length;i++){
+    const pct=Math.min(100,Math.round(dwell[i]/HOLD*100));
+    cells[i].querySelector(".zfill").style.height=pct+"%";
+    cells[i].classList.toggle("hot",i===best&&pct>10);
+    const c=$("choices").children[i];
+    if(c)c.classList.toggle("hot",i===best&&pct>25);
+  }
+}
+
 (function loopMotion(){
   if(camOn&&camReady&&video.videoWidth){
-    mctx.drawImage(video,0,0,64,48);
-    const cur=mctx.getImageData(0,0,64,48).data;
+    mctx.drawImage(video,0,0,W,H);
+    const cur=mctx.getImageData(0,0,W,H).data;
     if(prev){
-      let diff=0;for(let i=0;i<cur.length;i+=16)diff+=Math.abs(cur[i]-prev[i]);
-      if(diff/(cur.length/16)>26)hits++;else hits=Math.max(0,hits-1);
-      if(hits>4){hits=0;
-        if(waiting)finish();
-        else if(!$("s-intro").classList.contains("hidden"))start();
+      const onQuiz=!$("s-quiz").classList.contains("hidden");
+      const n=onQuiz?QUESTIONS[qi].a.length:1;
+      const sum=new Array(n).fill(0), cnt=new Array(n).fill(0);
+      for(let y=0;y<H;y+=2){
+        for(let x=0;x<W;x+=2){
+          const p=(y*W+x)*4;
+          // ภาพที่แสดงถูกกลับซ้าย-ขวา จึงกลับคอลัมน์ให้ตรงกับที่ผู้เล่นเห็น
+          const z=Math.min(n-1,Math.floor((W-1-x)/(W/n)));
+          sum[z]+=Math.abs(cur[p]-prev[p]);cnt[z]++;
+        }
+      }
+      const avg=sum.map((s,i)=>s/cnt[i]);
+      let best=0;for(let i=1;i<n;i++)if(avg[i]>avg[best])best=i;
+      const second=Math.max(...avg.filter((_,i)=>i!==best),0);
+
+      if(onQuiz){
+        if(Date.now()>lockUntil && avg[best]>MOVE && avg[best]>second*1.5){
+          dwell[best]=Math.min(HOLD,dwell[best]+1);
+          for(let i=0;i<n;i++)if(i!==best)dwell[i]=Math.max(0,dwell[i]-2);
+        }else{
+          for(let i=0;i<n;i++)dwell[i]=Math.max(0,dwell[i]-1);
+        }
+        paintZones(best);
+        if(dwell[best]>=HOLD && Date.now()>lockUntil){
+          lockUntil=Date.now()+900;dwell=dwell.map(()=>0);paintZones(-1);
+          pick(best);
+        }
+      }else{
+        // นอกหน้าคำถาม ใช้การโบกมือทั้งจอเป็นตัวสั่งงาน
+        if(avg[0]>24)hits++;else hits=Math.max(0,hits-1);
+        if(hits>5 && Date.now()>lockUntil){
+          hits=0;lockUntil=Date.now()+1200;
+          if(waiting)finish();
+          else if(!$("s-intro").classList.contains("hidden"))start();
+        }
       }
     }
     prev=cur;
