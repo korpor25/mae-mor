@@ -757,13 +757,17 @@ const HOLD_MS=1500;                    // ยกมือค้างกี่�
 const LOCK_MS=1400;                    // หลังเลือกแล้ว หยุดรับคำสั่งกี่มิลลิวินาที (รอให้ลดมือลง)
 const A_BG=0.020;                      // ความเร็วปรับพื้นหลังของจุดที่ว่าง (ตามแสงที่เปลี่ยน) ต่อ 1 เฟรม
 const A_FG=0.0016;                     // จุดที่เห็นเป็นวัตถุ ปรับช้ากว่ามาก เพื่อให้ "มือที่ยกค้าง" ไม่จมหายไป
-const AGE_MS=4000;                     // ของที่นิ่งอยู่กับที่เกิน 4 วินาที ให้ถือเป็นพื้นหลัง (เช่น ตัวคนที่ยืนรอ)
-const CAP=0.14;                        // ถ้าภาพเปลี่ยนเกินนี้ แปลว่ามีคนเดินเข้าออก ให้หยุดตรวจชั่วคราว
-const SETTLE_MS=700;                   // หลังภาพนิ่งแล้ว รออีกกี่มิลลิวินาทีจึงเริ่มตรวจใหม่
+const AGE_MS=2500;                     // ของที่นิ่งอยู่กับที่เกิน 2.5 วินาที ให้ถือเป็นพื้นหลัง (เช่น ตัวคนที่ยืนรอ)
+// "มีคนเดินเข้าออก" ต้องวัดจากการ "ขยับ" ระหว่างเฟรม ไม่ใช่จากขนาดพื้นที่ที่ต่างจากพื้นหลัง
+// เพราะคนที่มายืนนิ่ง ๆ หน้ากล้องก็กินพื้นที่มากอยู่แล้ว แต่ไม่ได้แปลว่าภาพกำลังวุ่นวาย
+const MOVE_CAP=10;                     // ค่าความขยับเฉลี่ยต่อจุด ถ้าเกินนี้ถือว่าภาพกำลังเปลี่ยนทั้งจอ
+const FLOOD=0.60;                      // ถ้าต่างจากพื้นหลังเกินนี้ แปลว่าแสงเปลี่ยนยกจอ ต้องจำใหม่
+const SETTLE_MS=500;                   // หลังภาพนิ่งแล้ว รออีกกี่มิลลิวินาทีจึงเริ่มตรวจใหม่
 const WARM_MS=600;                     // จำพื้นหลังนานเท่าไรจึงเริ่มเชื่อผลตรวจ
+const RELEARN_MS=400;                  // ภาพวุ่นวายนานเกินนี้ พอสงบแล้วให้จำพื้นหลังใหม่ทั้งหมด
 let SENS=4;                            // ระดับความไว 1–5 ปรับได้จากแถบใต้กล้อง
 let camReady=false, camOn=true, stream=null, prev=null, bg=null, age=null;
-let hits=0, dwell=[], lockUntil=0, warmup=0, settle=0, busy=false;
+let hits=0, dwell=[], lockUntil=0, warmup=0, settle=0, busy=false, busyMs=0;
 const video=$("cam"), video2=$("cam2"), mctx=$("motion").getContext("2d",{willReadFrequently:true});
 
 // เลือกวิดีโอที่กำลังแสดงผลอยู่จริง — วิดีโอที่ถูกซ่อน (display:none) จะไม่ส่งภาพใหม่ให้วิเคราะห์
@@ -845,25 +849,57 @@ let lastT=0;
 
     const onQuiz=!$("s-quiz").classList.contains("hidden");
     const n=onQuiz?QUESTIONS[qi].a.length:1;
-    const TH=[0,36,28,22,17,13][SENS];        // ต่างจากพื้นหลังเท่าไรจึงถือว่ามีของมาบัง
-    const NEED=[0,.17,.13,.10,.075,.055][SENS]; // ต้องบังพื้นที่ในช่องกี่ส่วนจึงนับว่าเลือก
+    const TH=[0,32,25,19,14,10][SENS];        // ต่างจากพื้นหลังเท่าไรจึงถือว่ามีของมาบัง
+    const NEED=[0,.15,.115,.085,.062,.046][SENS]; // ต้องบังพื้นที่ในช่องกี่ส่วนจึงนับว่าเลือก
     const fgMask=new Uint8Array(cur.length);
-    const fg=new Array(n).fill(0), tot=new Array(n).fill(0);
     let all=0, move=0;
 
-    for(let y=0;y<H;y++){
-      for(let x=0;x<W;x++){
-        const i=y*W+x;
-        // ภาพที่ผู้เล่นเห็นถูกกลับซ้าย-ขวา จึงกลับคอลัมน์ให้ตรงกับที่เห็นบนจอ
-        const z=Math.min(n-1,Math.floor((W-1-x)/(W/n)));
-        if(Math.abs(cur[i]-bg[i])>TH){fg[z]++;fgMask[i]=1;all++;}
-        tot[z]++;
-        move+=Math.abs(cur[i]-prev[i]);
-      }
+    // รอบที่ 1 — หาจุดที่ต่างจากพื้นหลัง และวัดว่าภาพขยับมากแค่ไหนเทียบกับเฟรมก่อน
+    for(let i=0;i<cur.length;i++){
+      if(Math.abs(cur[i]-bg[i])>TH){fgMask[i]=1;all++;}
+      move+=Math.abs(cur[i]-prev[i]);
     }
     move/=cur.length;
-    busy=all/cur.length>CAP;                  // มีคนเดินเข้าออกหรือภาพเปลี่ยนทั้งจอ
+
+    // รอบที่ 2 — กัดขอบทิ้ง: จุดที่จะนับต้องมีเพื่อนบ้านเป็นวัตถุอย่างน้อย 5 ใน 8
+    // ขอบเงาบาง ๆ ที่เกิดตอนคนขยับตัวหรือเอียงหน้าจะหายไป เหลือแต่ก้อนใหญ่จริง ๆ อย่างฝ่ามือ
+    const solid=new Uint8Array(cur.length);
+    for(let y=1;y<H-1;y++){
+      for(let x=1;x<W-1;x++){
+        const i=y*W+x;
+        if(!fgMask[i])continue;
+        const c=fgMask[i-W-1]+fgMask[i-W]+fgMask[i-W+1]
+               +fgMask[i-1]              +fgMask[i+1]
+               +fgMask[i+W-1]+fgMask[i+W]+fgMask[i+W+1];
+        if(c>=5)solid[i]=1;
+      }
+    }
+
+    // รอบที่ 3 — รวมคะแนนรายช่อง โดยให้แถวบนมีน้ำหนักมากกว่า
+    // มือที่ "ยกขึ้น" จะอยู่สูงกว่าหัวและลำตัวเสมอ จึงชนะใบหน้าที่อยู่กลางภาพ
+    const fg=new Array(n).fill(0), tot=new Array(n).fill(0);
+    for(let y=0;y<H;y++){
+      const wy=1+1.1*(1-y/(H-1));
+      for(let x=0;x<W;x++){
+        // ภาพที่ผู้เล่นเห็นถูกกลับซ้าย-ขวา จึงกลับคอลัมน์ให้ตรงกับที่เห็นบนจอ
+        const z=Math.min(n-1,Math.floor((W-1-x)/(W/n)));
+        if(solid[y*W+x])fg[z]+=wy;
+        tot[z]+=wy;
+      }
+    }
+
+    busy=move>MOVE_CAP||all/cur.length>FLOOD;  // มีคนเดินเข้าออก หรือแสงเปลี่ยนยกจอ
     settle=busy?SETTLE_MS:Math.max(0,settle-dt);
+    busyMs=busy?busyMs+dt:busyMs;
+    // ภาพเพิ่งวุ่นวายมานาน (มีคนเดินเข้ามายืน) พอสงบแล้วให้จำพื้นหลังใหม่
+    // ตัวและใบหน้าของคนที่ยืนอยู่จะกลายเป็นพื้นหลัง เหลือแต่ "มือที่ยกขึ้นทีหลัง" เป็นของใหม่
+    if(!busy&&settle===0&&busyMs>RELEARN_MS){
+      busyMs=0;resetVision();
+      $("zhint").textContent="กำลังจำพื้นหลังใหม่ ยืนนิ่ง ๆ สักครู่…";
+      requestAnimationFrame(loopMotion);return;
+    }
+    if(!busy&&settle===0)busyMs=0;
+
     const ratio=fg.map((f,i)=>f/tot[i]);
     let best=0;for(let i=1;i<n;i++)if(ratio[i]>ratio[best])best=i;
     const second=n>1?Math.max(...ratio.filter((_,i)=>i!==best)):0;
@@ -880,7 +916,8 @@ let lastT=0;
       }
       paintZones(strong?best:-1,strong);
       const left=Math.max(0,(HOLD_MS-dwell[best])/1000).toFixed(1);
-      $("zhint").textContent = !ready ? "กำลังจำพื้นหลัง ยืนนิ่ง ๆ สักครู่…"
+      $("zhint").textContent = busy ? "มีการเคลื่อนไหวมาก รอให้ภาพนิ่งก่อน…"
+        : !ready ? "กำลังจำพื้นหลัง ยืนนิ่ง ๆ สักครู่…"
         : strong ? "เห็นมือที่ช่อง "+(best+1)+" แล้ว ค้างไว้อีก "+left+" วินาที"
         : "ยกมือขึ้นเหนือหมายเลขที่เลือก ค้างไว้ 1.5 วินาที";
       if(dwell[best]>=HOLD_MS&&Date.now()>lockUntil){
